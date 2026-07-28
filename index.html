@@ -485,14 +485,14 @@ footer .credit a:hover{opacity:0.8;}
    address bar during scroll, which makes every fixed-position element on the
    page (nav, side-star, shop button) jitter. Plain scrolling hero avoids this. ---- */
 @media (max-width:820px){
-  .hero{position:relative;height:100svh;min-height:520px;}
-  .page-content{margin-top:0;}
-  .side-star{position:absolute;right:6px;}
+  .hero{position:relative !important;height:100svh;min-height:520px;}
+  .page-content{margin-top:0 !important;}
+  .side-star{position:absolute !important;right:6px !important;}
   /* content fades in unpredictably on short mobile scrolls; just show it */
   .reveal, .reveal-stagger, .reveal-stagger > *{opacity:1 !important;transform:none !important;}
   /* keep nothing poking past the viewport edge (avoids a few px of horizontal drift) */
   html, body{width:100%;overflow-x:hidden;}
-  .shop-fab{right:14px;}
+  .shop-fab{right:14px !important;}
 }
 
 /* ---- SHARP CORNERS: override every rounded edge in the system ---- */
