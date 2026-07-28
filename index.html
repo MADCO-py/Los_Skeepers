@@ -111,6 +111,7 @@ img{max-width:100%;display:block;}
   background:rgba(251,243,225,0.88);
   backdrop-filter:blur(6px);
   border-bottom:var(--line) solid var(--ink);
+  will-change:transform;transform:translateZ(0);
 }
 .nav-logo{display:flex;align-items:center;gap:10px;font-family:'Anton',sans-serif;font-size:1.3rem;}
 .nav-logo img{width:28px;height:auto;animation:navStarSpin 6s linear infinite;}
@@ -553,10 +554,11 @@ footer .credit a:hover{opacity:0.8;}
 .shop-fab{
   position:fixed;bottom:26px;right:26px;z-index:150;
   background:var(--red);color:var(--cream);border:var(--line) solid var(--ink);
-  padding:14px 20px;font-family:'Anton';font-size:1rem;transform:rotate(-4deg);
+  padding:14px 20px;font-family:'Anton';font-size:1rem;transform:rotate(-4deg) translateZ(0);
   box-shadow:5px 5px 0 var(--ink);transition:transform 0.2s ease;
+  will-change:transform;backface-visibility:hidden;
 }
-.shop-fab:hover{transform:rotate(0deg) scale(1.05);}
+.shop-fab:hover{transform:rotate(0deg) scale(1.05) translateZ(0);}
 @media (max-width:600px){.shop-fab{padding:10px 16px;font-size:0.85rem;bottom:16px;right:16px;}}
 .page-content{position:relative;z-index:2;background:var(--cream);margin-top:100svh;}
 </style>
@@ -585,7 +587,7 @@ footer .credit a:hover{opacity:0.8;}
 
 <!-- HERO -->
 <header class="hero">
-  <video autoplay muted loop playsinline>
+  <video autoplay muted loop playsinline poster="assets/hero-poster.jpg">
     <source src="assets/hero-video.mp4" type="video/mp4">
   </video>
   <div class="hero-content">
@@ -816,19 +818,19 @@ footer .credit a:hover{opacity:0.8;}
     <div class="glitch-tile" style="background-image:url('assets/crowd-1.jpg')"><span>lleno total</span></div>
     <div class="glitch-tile" style="background-image:url('assets/crowd-2.jpg')"><span>manos arriba</span></div>
     <div class="glitch-tile" style="background-image:url('assets/discoball.jpg')"><span>disco ball</span></div>
-    <div class="glitch-tile glitch-video"><video autoplay muted loop playsinline><source src="assets/gallery/gallery-vid-01.mp4" type="video/mp4"></video><span>clip 01</span></div>
+    <div class="glitch-tile glitch-video"><video muted loop playsinline preload="none" poster="assets/gallery/gallery-poster-01.jpg" data-src="assets/gallery/gallery-vid-01.mp4"><source data-src="assets/gallery/gallery-vid-01.mp4" type="video/mp4"></video><span>clip 01</span></div>
     <div class="glitch-tile" style="background-image:url('assets/singer-mic.jpg')"><span>en el mic</span></div>
-    <div class="glitch-tile glitch-video"><video autoplay muted loop playsinline><source src="assets/gallery/gallery-vid-02.mp4" type="video/mp4"></video><span>clip 02</span></div>
+    <div class="glitch-tile glitch-video"><video muted loop playsinline preload="none" poster="assets/gallery/gallery-poster-02.jpg" data-src="assets/gallery/gallery-vid-02.mp4"><source data-src="assets/gallery/gallery-vid-02.mp4" type="video/mp4"></video><span>clip 02</span></div>
     <div class="glitch-tile" style="background-image:url('assets/flashlights.jpg')"><span>luces arriba</span></div>
-    <div class="glitch-tile glitch-video"><video autoplay muted loop playsinline><source src="assets/gallery/gallery-vid-03.mp4" type="video/mp4"></video><span>clip 03</span></div>
+    <div class="glitch-tile glitch-video"><video muted loop playsinline preload="none" poster="assets/gallery/gallery-poster-03.jpg" data-src="assets/gallery/gallery-vid-03.mp4"><source data-src="assets/gallery/gallery-vid-03.mp4" type="video/mp4"></video><span>clip 03</span></div>
     <div class="glitch-tile" style="background-image:url('assets/fan-closeup.jpg')"><span>con la gente</span></div>
-    <div class="glitch-tile glitch-video"><video autoplay muted loop playsinline><source src="assets/gallery/gallery-vid-04.mp4" type="video/mp4"></video><span>clip 04</span></div>
-    <div class="glitch-tile glitch-video"><video autoplay muted loop playsinline><source src="assets/gallery/gallery-vid-05.mp4" type="video/mp4"></video><span>clip 05</span></div>
-    <div class="glitch-tile glitch-video"><video autoplay muted loop playsinline><source src="assets/gallery/gallery-vid-06.mp4" type="video/mp4"></video><span>clip 06</span></div>
-    <div class="glitch-tile glitch-video"><video autoplay muted loop playsinline><source src="assets/gallery/gallery-vid-07.mp4" type="video/mp4"></video><span>clip 07</span></div>
-    <div class="glitch-tile glitch-video"><video autoplay muted loop playsinline><source src="assets/gallery/gallery-vid-08.mp4" type="video/mp4"></video><span>clip 08</span></div>
-    <div class="glitch-tile glitch-video"><video autoplay muted loop playsinline><source src="assets/gallery/gallery-vid-09.mp4" type="video/mp4"></video><span>clip 09</span></div>
-    <div class="glitch-tile glitch-video"><video autoplay muted loop playsinline><source src="assets/gallery/gallery-vid-10.mp4" type="video/mp4"></video><span>clip 10</span></div>
+    <div class="glitch-tile glitch-video"><video muted loop playsinline preload="none" poster="assets/gallery/gallery-poster-04.jpg" data-src="assets/gallery/gallery-vid-04.mp4"><source data-src="assets/gallery/gallery-vid-04.mp4" type="video/mp4"></video><span>clip 04</span></div>
+    <div class="glitch-tile glitch-video"><video muted loop playsinline preload="none" poster="assets/gallery/gallery-poster-05.jpg" data-src="assets/gallery/gallery-vid-05.mp4"><source data-src="assets/gallery/gallery-vid-05.mp4" type="video/mp4"></video><span>clip 05</span></div>
+    <div class="glitch-tile glitch-video"><video muted loop playsinline preload="none" poster="assets/gallery/gallery-poster-06.jpg" data-src="assets/gallery/gallery-vid-06.mp4"><source data-src="assets/gallery/gallery-vid-06.mp4" type="video/mp4"></video><span>clip 06</span></div>
+    <div class="glitch-tile glitch-video"><video muted loop playsinline preload="none" poster="assets/gallery/gallery-poster-07.jpg" data-src="assets/gallery/gallery-vid-07.mp4"><source data-src="assets/gallery/gallery-vid-07.mp4" type="video/mp4"></video><span>clip 07</span></div>
+    <div class="glitch-tile glitch-video"><video muted loop playsinline preload="none" poster="assets/gallery/gallery-poster-08.jpg" data-src="assets/gallery/gallery-vid-08.mp4"><source data-src="assets/gallery/gallery-vid-08.mp4" type="video/mp4"></video><span>clip 08</span></div>
+    <div class="glitch-tile glitch-video"><video muted loop playsinline preload="none" poster="assets/gallery/gallery-poster-09.jpg" data-src="assets/gallery/gallery-vid-09.mp4"><source data-src="assets/gallery/gallery-vid-09.mp4" type="video/mp4"></video><span>clip 09</span></div>
+    <div class="glitch-tile glitch-video"><video muted loop playsinline preload="none" poster="assets/gallery/gallery-poster-10.jpg" data-src="assets/gallery/gallery-vid-10.mp4"><source data-src="assets/gallery/gallery-vid-10.mp4" type="video/mp4"></video><span>clip 10</span></div>
   </div>
 </section>
 
@@ -1032,9 +1034,30 @@ try {
 const sideStar = document.getElementById('side-star');
 if (sideStar) {
   window.addEventListener('scroll', () => {
-    sideStar.style.transform = `rotate(${window.scrollY * 0.35}deg)`;
+    sideStar.style.transform = `rotate(${window.scrollY * 0.35}deg) translateZ(0)`;
   }, { passive: true });
 }
+} catch(e) { console.error(e); }
+
+// ---- gallery videos: load + play only while visible (fixes black tiles from too many simultaneous autoplays) ----
+try {
+const galleryVideos = document.querySelectorAll('.glitch-video video');
+const videoIO = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    const vid = entry.target;
+    if (entry.isIntersecting) {
+      if (!vid.src && vid.dataset.src) {
+        const source = vid.querySelector('source');
+        if (source) source.src = source.dataset.src;
+        vid.load();
+      }
+      vid.play().catch(() => {});
+    } else {
+      vid.pause();
+    }
+  });
+}, { threshold: 0.25 });
+galleryVideos.forEach(v => videoIO.observe(v));
 } catch(e) { console.error(e); }
 
 // ---- mobile nav toggle ----
