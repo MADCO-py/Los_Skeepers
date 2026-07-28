@@ -198,6 +198,8 @@ section{position:relative;padding:100px 6vw;max-width:1360px;margin:0 auto;}
 .btn:hover{transform:rotate(0deg) translate(2px,2px);box-shadow:2px 2px 0 var(--ink);}
 .btn.alt{background:var(--paper);}
 .btn.dark{background:var(--ink);color:var(--cream);}
+.btn.outline{background:transparent;border-color:var(--cream);color:var(--cream);box-shadow:4px 4px 0 var(--cream);}
+.btn.outline:hover{box-shadow:2px 2px 0 var(--cream);}
 .btn.red{background:var(--red);color:var(--cream);}
 .btn.small{padding:8px 16px;font-size:0.72rem;}
 
@@ -473,6 +475,15 @@ footer img{width:22px;margin:0 auto 10px;}
 @media (max-width:400px){
   .hero-title{font-size:2.6rem;}
   .nav-links{padding:16px 20px;}
+}
+
+/* ---- disable the fixed/sticky hero on mobile: mobile browsers resize their
+   address bar during scroll, which makes every fixed-position element on the
+   page (nav, side-star, shop button) jitter. Plain scrolling hero avoids this. ---- */
+@media (max-width:820px){
+  .hero{position:relative;height:100svh;min-height:520px;}
+  .page-content{margin-top:0;}
+  .side-star{position:absolute;}
 }
 
 /* ---- SHARP CORNERS: override every rounded edge in the system ---- */
@@ -945,7 +956,7 @@ footer img{width:22px;margin:0 auto 10px;}
       <a class="btn" href="https://www.instagram.com/p/DV2Agbwj_4O/" target="_blank" rel="noopener">Instagram</a>
       <a class="btn alt" href="https://www.tiktok.com/@losskeepers" target="_blank" rel="noopener">TikTok</a>
       <a class="btn red" href="https://www.youtube.com/channel/UC4iGkgYty-UUlRz9sGtw4Gg" target="_blank" rel="noopener">YouTube</a>
-      <a class="btn dark" href="https://open.spotify.com/artist/3q9JMhPqxoWXTqoYfJs2RP" target="_blank" rel="noopener">Spotify</a>
+      <a class="btn outline" href="https://open.spotify.com/artist/3q9JMhPqxoWXTqoYfJs2RP" target="_blank" rel="noopener">Spotify</a>
     </div>
   </div>
 </section>
