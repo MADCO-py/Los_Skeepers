@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Los Skeepers — La primera boy band de Guatemala</title>
+<link rel="icon" href="assets/star-logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================
+   LOS SKEEPERS — design tokens
+   Palette: cream #FBF3E1, mustard #F0B429, forest #2B4C3F,
+            skeeper red #C50300, ink #191512, brown #6B4226
+   Display: 'Anton' | Body: 'Space Grotesk' | Utility: 'JetBrains Mono'
+   ============================================ */
+
+:root{
+  --cream:#FBF3E1;
+  --mustard:#F0B429;
+  --forest:#2B4C3F;
+  --red:#C50300;
+  --ink:#191512;
+  --brown:#6B4226;
+  --paper:#FFFDF6;
+  --line:3px;
+}
+
+*,*::before,*::after{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  background:var(--cream);
+  color:var(--ink);
+  font-family:'Space Grotesk', sans-serif;
+  overflow-x:hidden;
+  cursor:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'><text y='22' font-size='22'>%E2%98%85</text></svg>") 14 14, auto;
+}
+body.lock{overflow:hidden;}
+
+h1,h2,h3,.display{
+  font-family:'Anton', sans-serif;
+  text-transform:uppercase;
+  letter-spacing:0.5px;
+  line-height:0.95;
+  margin:0;
+}
+
+.eyebrow{
+  font-family:'JetBrains Mono', monospace;
+  text-transform:uppercase;
+  letter-spacing:2px;
+  font-size:0.75rem;
+  color:var(--red);
+  font-weight:700;
+}
+
+a{color:inherit;text-decoration:none;}
+img{max-width:100%;display:block;}
+
+.grain{
+  position:fixed;inset:0;pointer-events:none;z-index:9999;
+  opacity:0.05;mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.stars-layer{position:fixed;inset:0;pointer-events:none;z-index:5;overflow:hidden;}
+.floating-star{
+  position:absolute;width:26px;height:26px;opacity:0.55;
+  transition:transform 0.4s ease-out;
+  filter:drop-shadow(0 2px 3px rgba(0,0,0,0.2));
+}
+.side-star{
+  position:fixed;right:-10px;top:38%;width:120px;z-index:6;pointer-events:none;
+  opacity:0.9;filter:drop-shadow(3px 3px 0 rgba(0,0,0,0.15));
+  will-change:transform;
+}
+@media (max-width:820px){.side-star{width:70px;top:20%;}}
+
+/* ---- floating member cutouts, wobble on scroll, spring back upright ---- */
+.floating-char{
+  position:absolute;width:150px;z-index:3;pointer-events:none;
+  filter:drop-shadow(4px 6px 6px rgba(0,0,0,0.25));
+  transform-origin:bottom center;
+  transition:transform 0.5s cubic-bezier(.34,1.56,.64,1);
+}
+@media (max-width:820px){.floating-char{width:90px;}}
+
+.nav{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 28px;
+  background:rgba(251,243,225,0.88);
+  backdrop-filter:blur(6px);
+  border-bottom:var(--line) solid var(--ink);
+}
+.nav-logo{display:flex;align-items:center;gap:10px;font-family:'Anton',sans-serif;font-size:1.3rem;}
+.nav-logo img{width:28px;height:auto;animation:navStarSpin 6s linear infinite;}
+@keyframes navStarSpin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
+.nav-links{display:flex;gap:22px;font-family:'JetBrains Mono',monospace;font-size:0.8rem;text-transform:uppercase;}
+.nav-links a{position:relative;padding-bottom:2px;cursor:pointer;}
+.nav-links a:hover{color:var(--red);}
+.nav-toggle{display:none;background:none;border:none;font-size:1.6rem;cursor:pointer;font-family:inherit;}
+
+@media (max-width:820px){
+  .nav-links{
+    position:fixed;top:58px;right:0;left:0;background:var(--cream);
+    flex-direction:column;padding:18px 28px;gap:14px;
+    border-bottom:var(--line) solid var(--ink);
+    transform:translateY(-140%);transition:transform 0.3s ease;
+  }
+  .nav-links.open{transform:translateY(0);}
+  .nav-toggle{display:block;}
+}
+
+.hero{
+  position:fixed;inset:0;height:100svh;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  overflow:hidden;background:var(--ink);z-index:1;
+}
+.hero video{
+  position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0.55;
+}
+.hero::after{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(180deg, rgba(25,21,18,0.35) 0%, rgba(25,21,18,0.75) 100%);
+}
+.hero-content{position:relative;z-index:2;text-align:center;color:var(--paper);padding:0 20px;}
+.hero-content .eyebrow{color:var(--mustard);}
+.hero-title{
+  font-size:clamp(3rem,11vw,8rem);
+  color:var(--paper);
+  -webkit-text-stroke:2px var(--ink);
+}
+.hero-sub{
+  font-family:'JetBrains Mono',monospace;
+  margin-top:14px;font-size:clamp(0.9rem,2vw,1.15rem);
+  color:var(--mustard);
+}
+.hero-scroll{
+  position:absolute;bottom:70px;left:50%;transform:translateX(-50%);
+  font-family:'JetBrains Mono',monospace;color:var(--paper);font-size:0.75rem;
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  animation:bob 1.8s infinite ease-in-out;
+}
+@keyframes bob{0%,100%{transform:translate(-50%,0);}50%{transform:translate(-50%,8px);}}
+
+.marquee-wrap{
+  background:var(--red);color:var(--cream);
+  border-top:var(--line) solid var(--ink);border-bottom:var(--line) solid var(--ink);
+  overflow:hidden;white-space:nowrap;padding:12px 0;
+}
+.marquee-track{display:flex;width:max-content;animation:scrollMarquee 22s linear infinite;}
+.marquee-track span{
+  font-family:'Anton',sans-serif;font-size:1.1rem;text-transform:uppercase;
+  margin:0 22px;letter-spacing:1px;white-space:nowrap;
+}
+@keyframes scrollMarquee{0%{transform:translateX(0);}100%{transform:translateX(-50%);}}
+
+section{position:relative;padding:100px 6vw;max-width:1360px;margin:0 auto;}
+.section-head{margin-bottom:44px;max-width:640px;}
+.section-head h2{font-size:clamp(2.2rem,5vw,4rem);margin-top:6px;}
+.section-head p{font-family:'Space Grotesk';font-size:1.05rem;color:var(--ink);opacity:0.8;margin-top:12px;}
+
+.reveal{opacity:0;transform:translateY(28px);transition:opacity 0.7s ease, transform 0.7s ease;}
+.reveal.in{opacity:1;transform:translateY(0);}
+
+.btn{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:'JetBrains Mono',monospace;text-transform:uppercase;font-size:0.82rem;
+  font-weight:700;letter-spacing:0.5px;
+  background:var(--mustard);color:var(--ink);
+  border:var(--line) solid var(--ink);
+  padding:12px 22px;border-radius:40px;
+  transform:rotate(-1.5deg);
+  box-shadow:4px 4px 0 var(--ink);
+  transition:transform 0.15s ease, box-shadow 0.15s ease;
+  cursor:pointer;
+}
+.btn:hover{transform:rotate(0deg) translate(2px,2px);box-shadow:2px 2px 0 var(--ink);}
+.btn.alt{background:var(--paper);}
+.btn.dark{background:var(--ink);color:var(--cream);}
+.btn.red{background:var(--red);color:var(--cream);}
+.btn.small{padding:8px 16px;font-size:0.72rem;}
+
+.about{display:grid;grid-template-columns:1.1fr 0.9fr;gap:60px;align-items:center;}
+.about-photo{position:relative;}
+.about-photo img{border:var(--line) solid var(--ink);border-radius:18px;transform:rotate(-2deg);}
+.about-photo::before{
+  content:"★";position:absolute;top:-26px;right:-18px;font-size:3rem;color:var(--red);
+  transform:rotate(12deg);
+}
+.about-text .eyebrow{margin-bottom:10px;display:block;}
+.about-text p{font-size:1.05rem;line-height:1.6;margin-top:16px;}
+.stat-row{display:flex;gap:28px;margin-top:28px;flex-wrap:wrap;}
+.stat{font-family:'JetBrains Mono',monospace;}
+.stat b{display:block;font-family:'Anton',sans-serif;font-size:1.8rem;color:var(--forest);}
+
+@media (max-width:820px){ .about{grid-template-columns:1fr;} }
+
+.song-card{
+  display:grid;grid-template-columns:0.9fr 1.1fr;gap:40px;align-items:center;
+  margin-bottom:56px;
+}
+.song-info{padding:0;display:flex;flex-direction:column;justify-content:center;}
+.song-info h3{font-size:2.2rem;}
+.song-info .eyebrow{margin-bottom:8px;}
+.song-embed iframe{width:100%;min-height:180px;border:none;display:block;}
+@media (max-width:760px){.song-card{grid-template-columns:1fr;gap:16px;}}
+
+.artist-embed{
+  overflow:hidden;margin-top:20px;
+}
+.artist-embed iframe{width:100%;border:none;display:block;}
+
+.album-card{
+  display:flex;gap:34px;background:var(--forest);color:var(--cream);
+  border:var(--line) solid var(--ink);border-radius:20px;padding:34px;flex-wrap:wrap;
+}
+.album-cover{
+  width:170px;height:170px;flex:none;border-radius:14px;border:var(--line) solid var(--ink);
+  background:var(--mustard);display:flex;align-items:center;justify-content:center;
+  font-family:'Anton';color:var(--ink);text-align:center;font-size:1.1rem;padding:10px;
+  transform:rotate(-3deg);
+}
+.track-list{list-style:none;margin:14px 0 0;padding:0;font-family:'JetBrains Mono',monospace;}
+.track-list li{
+  display:flex;justify-content:space-between;padding:10px 0;
+  border-bottom:1px dashed rgba(251,243,225,0.35);
+}
+
+/* ---- discography track list (spotify-style) ---- */
+.discog-panel{background:#3B2410;color:var(--cream);border:var(--line) solid var(--ink);padding:0;}
+.discog-row{
+  display:flex;align-items:center;gap:18px;padding:14px 26px;
+  border-bottom:1px solid rgba(251,243,225,0.12);text-decoration:none;color:inherit;
+}
+.discog-row:last-child{border-bottom:none;}
+.discog-row:hover{background:rgba(251,243,225,0.06);}
+.discog-num{font-family:'JetBrains Mono',monospace;width:22px;opacity:0.6;font-size:0.9rem;}
+.discog-cover{width:52px;height:52px;object-fit:cover;flex:none;border:2px solid var(--ink);}
+.discog-title{flex:1;min-width:0;}
+.discog-title b{display:block;font-family:'Space Grotesk';font-weight:700;font-size:1rem;}
+.discog-title span{font-family:'JetBrains Mono',monospace;font-size:0.72rem;opacity:0.65;}
+.discog-time{font-family:'JetBrains Mono',monospace;font-size:0.82rem;opacity:0.7;}
+
+.shows-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:26px;}
+.show-card{
+  border:var(--line) solid var(--ink);border-radius:16px;overflow:hidden;background:var(--paper);
+}
+.show-card img{aspect-ratio:4/5;object-fit:cover;width:100%;}
+
+/* ---- hand-built instagram post card (no screenshots) ---- */
+.ig-card{background:#fff;font-family:-apple-system,'Space Grotesk',sans-serif;border-bottom:var(--line) solid var(--ink);}
+.ig-card-head{display:flex;align-items:center;gap:10px;padding:12px 14px;}
+.ig-avatar{
+  width:34px;height:34px;flex:none;color:#fff;font-family:'Anton';font-size:1rem;
+  display:flex;align-items:center;justify-content:center;
+}
+.ig-card-uname{flex:1;min-width:0;}
+.ig-card-uname b{display:block;font-size:0.86rem;font-weight:700;color:#111;}
+.ig-card-uname span{display:block;font-size:0.7rem;color:#8a8a8a;font-family:'JetBrains Mono',monospace;}
+.ig-follow-btn{
+  font-family:'JetBrains Mono',monospace;font-size:0.68rem;text-transform:uppercase;
+  background:var(--red);color:#fff;padding:6px 12px;border:none;letter-spacing:0.5px;
+}
+.ig-card-photo{width:100%;aspect-ratio:4/5;object-fit:cover;display:block;}
+.ig-card-icons{display:flex;gap:16px;padding:12px 14px 4px;font-size:1.3rem;color:#111;}
+.ig-card-icons .push{margin-left:auto;}
+.ig-card-likes{padding:2px 14px 0;font-size:0.82rem;font-weight:700;color:#111;}
+.ig-card-caption{padding:6px 14px 0;font-size:0.82rem;color:#111;line-height:1.4;}
+.ig-card-caption b{margin-right:5px;}
+.ig-card-comments{padding:6px 14px 0;font-size:0.76rem;color:#8a8a8a;font-family:'JetBrains Mono',monospace;}
+.ig-card-addcomment{
+  display:flex;align-items:center;gap:8px;padding:12px 14px;margin-top:8px;
+  border-top:1px solid #efefef;font-size:0.76rem;color:#8a8a8a;font-family:'JetBrains Mono',monospace;
+}
+.show-meta{padding:18px;}
+.show-meta .eyebrow{display:block;margin-bottom:4px;}
+.show-meta h3{font-size:1.3rem;}
+.show-meta p{font-family:'JetBrains Mono',monospace;font-size:0.82rem;margin-top:8px;opacity:0.75;}
+@media (max-width:900px){.shows-grid{grid-template-columns:1fr 1fr;}}
+@media (max-width:600px){.shows-grid{grid-template-columns:1fr;}}
+
+.polaroid-strip{display:none;}
+
+/* ---- full-bleed glitch gallery (latin-mafia style) ---- */
+.glitch-gallery{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:4px;
+  margin-top:10px;
+}
+.glitch-tile{
+  position:relative;overflow:hidden;aspect-ratio:1/1;
+  background-size:cover;background-position:center;
+  border:1px solid var(--ink);
+}
+.glitch-tile::before,.glitch-tile::after{
+  content:"";position:absolute;inset:0;
+  background-image:inherit;background-size:cover;background-position:center;
+  mix-blend-mode:screen;opacity:0;transition:opacity 0.15s ease;
+}
+.glitch-tile::before{background-color:rgba(197,3,0,0.45);}
+.glitch-tile::after{background-color:rgba(43,76,63,0.45);}
+.glitch-tile:hover::before{opacity:1;animation:glitchA 0.25s steps(2) infinite;}
+.glitch-tile:hover::after{opacity:1;animation:glitchB 0.25s steps(2) infinite;}
+.glitch-tile:hover{filter:contrast(1.1);}
+@keyframes glitchA{0%{transform:translate(5px,0);}50%{transform:translate(-3px,3px);}100%{transform:translate(5px,0);}}
+@keyframes glitchB{0%{transform:translate(-5px,0);}50%{transform:translate(3px,-3px);}100%{transform:translate(-5px,0);}}
+.glitch-tile span{
+  position:absolute;left:14px;bottom:12px;z-index:2;color:var(--cream);
+  font-family:'JetBrains Mono',monospace;font-size:0.72rem;text-transform:uppercase;
+  text-shadow:0 2px 4px rgba(0,0,0,0.8);
+}
+@media (max-width:760px){.glitch-gallery{grid-template-columns:repeat(3,1fr);}}
+@media (max-width:480px){.glitch-gallery{grid-template-columns:repeat(2,1fr);}}
+
+.glitch-tile.glitch-video{background:#111;}
+.glitch-tile.glitch-video video{width:100%;height:100%;object-fit:cover;display:block;}
+.glitch-video:hover video{animation:videoGlitch 0.25s steps(2) infinite;}
+@keyframes videoGlitch{
+  0%{filter:hue-rotate(0deg) saturate(1.3);transform:translate(0,0) scale(1.02);}
+  50%{filter:hue-rotate(20deg) saturate(1.8);transform:translate(2px,-2px) scale(1.02);}
+  100%{filter:hue-rotate(-20deg) saturate(1.3);transform:translate(-2px,2px) scale(1.02);}
+}
+
+.members-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:26px;}
+.member-card{
+  position:relative;border:var(--line) solid var(--ink);border-radius:18px;overflow:hidden;
+  background:var(--ink);aspect-ratio:3/4;display:block;cursor:pointer;
+}
+.member-card img{width:100%;height:100%;object-fit:cover;opacity:0.9;transition:transform 0.4s ease;}
+.member-card:hover img{transform:scale(1.06);}
+.member-tag{
+  position:absolute;left:14px;bottom:14px;background:var(--mustard);
+  border:2px solid var(--ink);border-radius:30px;padding:8px 16px;
+  font-family:'Anton';font-size:1.1rem;transform:rotate(-2deg);color:var(--ink);
+}
+@media (max-width:900px){.members-grid{grid-template-columns:1fr 1fr;}}
+@media (max-width:560px){.members-grid{grid-template-columns:1fr;}}
+
+.merch-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:26px;}
+.merch-card{background:transparent;}
+.merch-thumb{
+  aspect-ratio:1/1;background:repeating-linear-gradient(45deg,#eee,#eee 10px,#e2e2e2 10px,#e2e2e2 20px);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'JetBrains Mono',monospace;font-size:0.78rem;text-align:center;color:#8a8a8a;padding:20px;
+}
+.merch-info{padding:14px 2px 0;}
+.merch-info h3{font-size:1.05rem;text-transform:none;font-family:'Space Grotesk';font-weight:700;}
+.merch-info .price{font-family:'JetBrains Mono',monospace;color:var(--red);font-weight:700;margin-top:6px;}
+.merch-ticker{
+  background:var(--ink);color:var(--cream);overflow:hidden;white-space:nowrap;
+  padding:10px 0;margin-bottom:40px;
+}
+.merch-ticker .marquee-track{animation-duration:20s;}
+.merch-ticker .marquee-track span{
+  font-family:'JetBrains Mono',monospace;font-size:0.78rem;text-transform:uppercase;
+  letter-spacing:1px;margin:0 22px;
+}
+
+/* ---- muro de fans ---- */
+.fans-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;}
+.fan-tile{border:var(--line) solid var(--ink);overflow:hidden;aspect-ratio:1/1;transition:transform 0.25s ease;}
+.fan-tile:nth-child(3n+1){transform:rotate(-2deg);}
+.fan-tile:nth-child(3n+2){transform:rotate(1.5deg);}
+.fan-tile:nth-child(3n){transform:rotate(-1deg);}
+.fan-tile img{width:100%;height:100%;object-fit:cover;display:block;}
+.fan-tile:hover{transform:rotate(0deg) scale(1.04);z-index:2;position:relative;}
+@media (max-width:900px){.fans-grid{grid-template-columns:repeat(3,1fr);}}
+@media (max-width:560px){.fans-grid{grid-template-columns:repeat(2,1fr);}}
+@media (max-width:900px){.merch-grid{grid-template-columns:1fr 1fr;}}
+@media (max-width:560px){.merch-grid{grid-template-columns:1fr;}}
+
+.press-grid{display:grid;grid-template-columns:1fr 1fr;gap:26px;}
+.press-card{
+  border:var(--line) solid var(--ink);background:var(--paper);overflow:hidden;
+}
+.press-photo{aspect-ratio:16/9;overflow:hidden;}
+.press-photo img{width:100%;height:100%;object-fit:cover;display:block;}
+.press-card-body{padding:26px;}
+.press-source{display:flex;align-items:center;gap:10px;margin-bottom:14px;font-family:'Anton';font-size:1.1rem;}
+.press-source .dot{width:10px;height:10px;background:var(--red);border-radius:50%;}
+.press-card h3{font-size:1.4rem;font-family:'Space Grotesk';font-weight:700;text-transform:none;margin-top:6px;}
+.press-card p{margin-top:10px;font-size:0.95rem;line-height:1.55;opacity:0.85;}
+.press-meta{font-family:'JetBrains Mono',monospace;font-size:0.72rem;opacity:0.6;margin-top:12px;}
+@media (max-width:760px){.press-grid{grid-template-columns:1fr;}}
+
+.follow{background:var(--ink);color:var(--cream);border-radius:26px;text-align:center;padding:70px 6vw;}
+.follow h2{font-size:clamp(2.2rem,6vw,4.2rem);color:var(--paper);}
+.follow-links{display:flex;flex-wrap:wrap;justify-content:center;gap:14px;margin-top:34px;}
+
+footer{
+  text-align:center;padding:40px 6vw;font-family:'JetBrains Mono',monospace;
+  font-size:0.78rem;opacity:0.7;
+}
+footer img{width:22px;margin:0 auto 10px;}
+
+/* ---- member overlay (acts like "another page") ---- */
+.member-overlay{
+  position:fixed;inset:0;z-index:500;background:var(--cream);
+  transform:translateY(100%);transition:transform 0.45s cubic-bezier(.65,0,.35,1);
+  overflow-y:auto;
+}
+.member-overlay.open{transform:translateY(0);}
+.member-hero{
+  position:relative;min-height:60vh;display:flex;align-items:flex-end;
+  background:var(--ink);overflow:hidden;
+}
+.member-hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0.5;}
+.member-hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(25,21,18,0.1),rgba(25,21,18,0.92));}
+.member-hero-content{position:relative;z-index:2;padding:60px 6vw;color:var(--paper);}
+.member-hero-content h1{font-size:clamp(3rem,10vw,7rem);color:var(--paper);-webkit-text-stroke:2px var(--ink);}
+.member-close{
+  position:fixed;top:20px;right:20px;z-index:510;
+}
+.member-body{max-width:760px;margin:0 auto;padding:70px 6vw;}
+.member-body p{font-size:1.1rem;line-height:1.7;}
+.member-playlist{margin-top:30px;border:var(--line) solid var(--ink);border-radius:18px;overflow:hidden;}
+.member-playlist iframe{width:100%;border:none;display:block;}
+.member-nav-strip{display:flex;justify-content:center;gap:10px;padding:0 6vw 60px;flex-wrap:wrap;}
+
+/* ---- mobile polish pass ---- */
+@media (max-width:600px){
+  section{padding:64px 5vw;}
+  .nav{padding:12px 16px;}
+  .nav-logo{font-size:1.05rem;gap:7px;}
+  .nav-logo img{width:22px;}
+  .hero-content{padding:0 14px;}
+  .hero-sub{font-size:0.85rem;}
+  .marquee-track span{font-size:0.85rem;margin:0 14px;}
+  .marquee-wrap,.merch-ticker{padding:9px 0;}
+  .discog-row{padding:11px 14px;gap:12px;}
+  .discog-cover{width:42px;height:42px;}
+  .discog-title b{font-size:0.88rem;}
+  .discog-num{width:16px;font-size:0.78rem;}
+  .discog-time{font-size:0.72rem;}
+  .countdown-band{padding:32px 5vw;gap:20px;justify-content:flex-start;}
+  .countdown-label h3{font-size:1.3rem;}
+  .countdown-unit{padding:10px 12px;min-width:64px;}
+  .countdown-unit b{font-size:1.5rem;}
+  .press-photo{aspect-ratio:4/3;}
+  .press-card-body{padding:18px;}
+  .about-photo::before{font-size:2rem;top:-16px;right:-8px;}
+  .follow{padding:44px 5vw;border-radius:0;}
+  .side-star{opacity:0.6;}
+}
+@media (max-width:400px){
+  .hero-title{font-size:2.6rem;}
+  .nav-links{padding:16px 20px;}
+}
+
+/* ---- SHARP CORNERS: override every rounded edge in the system ---- */
+*{border-radius:0 !important;}
+
+/* ---- countdown ---- */
+.countdown-band{
+  background:var(--mustard);border-top:var(--line) solid var(--ink);border-bottom:var(--line) solid var(--ink);
+  padding:50px 6vw;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:40px;
+}
+.countdown-label{transform:rotate(-2deg);}
+.countdown-label .eyebrow{color:var(--ink);}
+.countdown-label h3{font-size:clamp(1.6rem,4vw,2.6rem);}
+.countdown-units{display:flex;gap:18px;flex-wrap:wrap;}
+.countdown-unit{
+  background:var(--ink);color:var(--cream);border:var(--line) solid var(--ink);
+  padding:16px 20px;min-width:86px;text-align:center;
+}
+.countdown-unit:nth-child(2){transform:rotate(2deg);}
+.countdown-unit:nth-child(3){transform:rotate(-2deg);}
+.countdown-unit b{display:block;font-family:'Anton';font-size:2.2rem;}
+.countdown-unit span{font-family:'JetBrains Mono',monospace;font-size:0.65rem;text-transform:uppercase;letter-spacing:1px;}
+
+/* ---- glitch title ---- */
+.hero-title{position:relative;}
+.hero-title:hover{animation:glitch 0.4s steps(2) infinite;}
+@keyframes glitch{
+  0%{text-shadow:3px 0 var(--red), -3px 0 var(--forest);}
+  50%{text-shadow:-3px 0 var(--red), 3px 0 var(--forest);}
+  100%{text-shadow:3px 0 var(--red), -3px 0 var(--forest);}
+}
+.section-head h2{transition:letter-spacing 0.3s ease;}
+.section-head h2:hover{letter-spacing:2px;}
+
+/* ---- hover tilts on cards ---- */
+.show-card, .merch-card, .press-card{transition:transform 0.3s ease, box-shadow 0.3s ease;}
+.show-card:hover{transform:rotate(-1.5deg) translateY(-4px);box-shadow:6px 6px 0 var(--ink);}
+.merch-card:hover{transform:rotate(1.5deg) translateY(-4px);}
+.press-card:hover{transform:translateY(-4px);box-shadow:6px 6px 0 var(--ink);}
+.member-card:hover{transform:rotate(-2deg) scale(1.02);}
+
+/* ---- stagger reveal children ---- */
+.shows-grid.reveal-stagger > *, .merch-grid.reveal-stagger > *, .members-grid.reveal-stagger > * {
+  opacity:0;transform:translateY(24px) rotate(0deg);transition:opacity 0.6s ease, transform 0.6s ease;
+}
+.shows-grid.reveal-stagger.in > *, .merch-grid.reveal-stagger.in > *, .members-grid.reveal-stagger.in > *{
+  opacity:1;transform:translateY(0);
+}
+
+/* ---- more diagonal placement ---- */
+.section-head{transform:rotate(-0.6deg);}
+.press-source{transform:rotate(-1deg);}
+.show-meta .eyebrow{display:inline-block;transform:rotate(-2deg);}
+.merch-info h3{transform:rotate(-0.4deg);}
+.stat:nth-child(2){transform:rotate(2deg);}
+.stat:nth-child(3){transform:rotate(-2deg);}
+
+/* ---- shop cta sticker (fixed) ---- */
+.shop-fab{
+  position:fixed;bottom:26px;right:26px;z-index:150;
+  background:var(--red);color:var(--cream);border:var(--line) solid var(--ink);
+  padding:14px 20px;font-family:'Anton';font-size:1rem;transform:rotate(-4deg);
+  box-shadow:5px 5px 0 var(--ink);transition:transform 0.2s ease;
+}
+.shop-fab:hover{transform:rotate(0deg) scale(1.05);}
+@media (max-width:600px){.shop-fab{padding:10px 16px;font-size:0.85rem;bottom:16px;right:16px;}}
+.page-content{position:relative;z-index:2;background:var(--cream);margin-top:100svh;}
+</style>
+</head>
+<body>
+
+<div class="grain"></div>
+<div class="stars-layer"></div>
+<img src="assets/star-yellow.png" class="side-star" id="side-star" alt="">
+
+<nav class="nav">
+  <div class="nav-logo"><img src="assets/star-logo.png" alt="Los Skeepers"> LOS SKEEPERS</div>
+  <div class="nav-links">
+    <a href="#musica">Música</a>
+    <a href="#albumes">Álbumes</a>
+    <a href="#shows">Shows</a>
+    <a href="#galeria">Galería</a>
+    <a href="#fans">Fans</a>
+    <a href="#integrantes">Integrantes</a>
+    <a href="#merch">Merch</a>
+    <a href="#prensa">Prensa</a>
+    <a href="#seguir">Síguenos</a>
+  </div>
+  <button class="nav-toggle" aria-label="Abrir menú">☰</button>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <video autoplay muted loop playsinline>
+    <source src="assets/hero-video.mp4" type="video/mp4">
+  </video>
+  <div class="hero-content">
+    <span class="eyebrow">Guatemala ★ Indie / Pop</span>
+    <h1 class="hero-title">LOS<br>SKEEPERS</h1>
+    <p class="hero-sub">La primera boy band de Guatemala</p>
+  </div>
+  <div class="hero-scroll">SCROLL ↓</div>
+</header>
+
+<div class="page-content">
+<div class="marquee-wrap">
+  <div class="marquee-track">
+    <span>★ LOS SKEEPERS</span><span>★ LA PRIMERA BOY BAND DE GUATEMALA</span>
+    <span>★ NADA MÁS +</span><span>★ SI TE GUSTA</span>
+    <span>★ LOS SKEEPERS</span><span>★ LA PRIMERA BOY BAND DE GUATEMALA</span>
+    <span>★ NADA MÁS +</span><span>★ SI TE GUSTA</span>
+  </div>
+</div>
+
+<!-- ABOUT -->
+<section id="about" class="about reveal">
+  <img src="assets/char-1.png" class="floating-char" style="top:-30px;right:0;" alt="">
+  <div class="about-photo">
+    <img src="assets/group-hero.jpg" alt="Los Skeepers, foto grupal">
+  </div>
+  <div class="about-text">
+    <span class="eyebrow">Quiénes somos</span>
+    <h2>Seis voces,<br>una sola banda.</h2>
+    <p>Los Skeepers nacieron en Guatemala casi por accidente: de ensayos nocturnos entre amigos a shows con la sala llena. Hoy son la primera boy band del país, mezclando pop, indie y actitud de barrio con la energía de un colectivo que crece en cada show.</p>
+    <div class="stat-row">
+      <div class="stat"><b>6</b>integrantes</div>
+      <div class="stat"><b>+20K</b>oyentes mensuales</div>
+      <div class="stat"><b>GT</b>Guatemala</div>
+    </div>
+  </div>
+</section>
+
+<!-- MUSICA -->
+<section id="musica" class="reveal">
+  <img src="assets/char-2.png" class="floating-char" style="top:20px;left:-10px;" alt="">
+  <div class="section-head">
+    <span class="eyebrow">Escúchanos</span>
+    <h2>Canciones</h2>
+    <p>Nuestros sencillos, uno por uno.</p>
+  </div>
+
+  <div class="song-card">
+    <div class="song-embed">
+      <iframe src="https://open.spotify.com/embed/track/4wghV1vcoQ7t25iH3JD06t?utm_source=generator" allowfullscreen loading="lazy" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>
+    </div>
+    <div class="song-info">
+      <span class="eyebrow">Sencillo</span>
+      <h3>Nada Más +</h3>
+      <p>Disponible en todas las plataformas digitales.</p>
+    </div>
+  </div>
+
+  <div class="song-card">
+    <div class="song-embed">
+      <iframe src="https://open.spotify.com/embed/track/0AdlQyT3mRtIe33mOwBQEE?utm_source=generator" allowfullscreen loading="lazy" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>
+    </div>
+    <div class="song-info">
+      <span class="eyebrow">Sencillo</span>
+      <h3>Si Te Gusta</h3>
+      <p>Mencionada por NPR Music en su segmento Alt.Latino.</p>
+    </div>
+  </div>
+
+  <div class="artist-embed">
+    <iframe src="https://open.spotify.com/embed/artist/3q9JMhPqxoWXTqoYfJs2RP?utm_source=generator" width="100%" height="352" allowfullscreen loading="lazy" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>
+  </div>
+</section>
+
+<!-- ALBUMES / DISCOGRAFIA -->
+<section id="albumes" class="reveal">
+  <div class="section-head">
+    <span class="eyebrow">Discografía</span>
+    <h2>Todas las canciones</h2>
+    <p>Nuestro catálogo completo, sencillo por sencillo.</p>
+  </div>
+  <div class="discog-panel">
+    <a class="discog-row" href="https://open.spotify.com/album/0a2Xcp0g00bOw2jbukDBVY" target="_blank" rel="noopener">
+      <span class="discog-num">01</span>
+      <img class="discog-cover" src="assets/cover-nadamas.jpg" alt="Nada Más +">
+      <span class="discog-title"><b>Nada Más +</b><span>Los Skeepers</span></span>
+      <span class="discog-time">03:02</span>
+    </a>
+    <div class="discog-row">
+      <span class="discog-num">02</span>
+      <img class="discog-cover" src="assets/cover-tuyyo.jpg" alt="tú y yo (y todo lo que falta)">
+      <span class="discog-title"><b>tú y yo (y todo lo que falta)</b><span>Los Skeepers</span></span>
+      <span class="discog-time">--:--</span>
+    </div>
+    <a class="discog-row" href="#shows">
+      <span class="discog-num">03</span>
+      <img class="discog-cover" src="assets/flyer-juanillo.jpg" alt="Juanillo Reguetón">
+      <span class="discog-title"><b>Juanillo Reguetón</b><span>Los Skeepers</span></span>
+      <span class="discog-time">02:54</span>
+    </a>
+    <div class="discog-row">
+      <span class="discog-num">04</span>
+      <img class="discog-cover" src="assets/cover-horaymedia.jpg" alt="Hora y Media">
+      <span class="discog-title"><b>Hora y Media</b><span>Los Skeepers</span></span>
+      <span class="discog-time">--:--</span>
+    </div>
+    <a class="discog-row" href="https://open.spotify.com/track/0AdlQyT3mRtIe33mOwBQEE" target="_blank" rel="noopener">
+      <span class="discog-num">05</span>
+      <img class="discog-cover" src="assets/cover-sitegusta.jpg" alt="Si te gusta?">
+      <span class="discog-title"><b>Si te gusta?</b><span>Fabuloso, Los Skeepers</span></span>
+      <span class="discog-time">02:40</span>
+    </a>
+    <div class="discog-row">
+      <span class="discog-num">06</span>
+      <img class="discog-cover" src="assets/cover-loquduele.jpg" alt="Lo Que Duele">
+      <span class="discog-title"><b>Lo Que Duele</b><span>Los Skeepers</span></span>
+      <span class="discog-time">--:--</span>
+    </div>
+    <div class="discog-row">
+      <span class="discog-num">07</span>
+      <img class="discog-cover" src="assets/cover-siempre.jpg" alt="SIEMPRE">
+      <span class="discog-title"><b>SIEMPRE</b><span>Los Skeepers</span></span>
+      <span class="discog-time">--:--</span>
+    </div>
+    <div class="discog-row">
+      <span class="discog-num">08</span>
+      <img class="discog-cover" src="assets/cover-luismigirl.jpg" alt="Luismigirl">
+      <span class="discog-title"><b>Luismigirl</b><span>Los Skeepers</span></span>
+      <span class="discog-time">--:--</span>
+    </div>
+  </div>
+</section>
+
+<!-- SHOWS -->
+<section id="shows" class="reveal">
+  <img src="assets/char-3.png" class="floating-char" style="top:0;right:-10px;" alt="">
+  <div class="section-head">
+    <span class="eyebrow">En vivo</span>
+    <h2>Festivales &amp; Shows</h2>
+    <p>Donde nos han visto tocar.</p>
+  </div>
+  <div class="shows-grid reveal-stagger">
+    <div class="show-card">
+      <div class="ig-card">
+        <div class="ig-card-head">
+          <div class="ig-avatar" style="background:var(--forest);">F</div>
+          <div class="ig-card-uname"><b>festivalbarrilete</b><span>Guatemala, GT</span></div>
+          <a class="ig-follow-btn" href="https://www.instagram.com/festivalbarrilete/" target="_blank" rel="noopener">Ver perfil</a>
+        </div>
+        <img class="ig-card-photo" src="assets/ig-photo-barrilete.jpg" alt="Festival Barrilete '26">
+        <div class="ig-card-icons">♡ 💬 ➤ <span class="push">🔖</span></div>
+        <div class="ig-card-likes">246 personas más</div>
+        <div class="ig-card-caption"><b>festivalbarrilete</b>Llegó el día de anunciar el line-up de Road to Barrilete Vol. 1 — nos vemos en La Guarida el 1 de agosto 🎪</div>
+        <div class="ig-card-comments">Ver los 9 comentarios</div>
+        <div class="ig-card-addcomment">◯ Añade un comentario...</div>
+      </div>
+      <div class="show-meta">
+        <span class="eyebrow">Próximo · 1 agosto</span>
+        <h3>Festival Barrilete '26</h3>
+        <p>La Guarida, Zona 4 — Road to Barrilete Vol. 1</p>
+      </div>
+    </div>
+    <div class="show-card">
+      <div class="ig-card">
+        <div class="ig-card-head">
+          <div class="ig-avatar" style="background:var(--mustard);color:var(--ink);">L</div>
+          <div class="ig-card-uname"><b>los.skeepers</b><span>Guatemala, GT</span></div>
+          <a class="ig-follow-btn" href="https://www.instagram.com/los.skeepers/" target="_blank" rel="noopener">Ver perfil</a>
+        </div>
+        <img class="ig-card-photo" src="assets/ig-photo-juanillo.jpg" alt="Juanillo Reguetón Release Party">
+        <div class="ig-card-icons">♡ 💬 ➤ <span class="push">🔖</span></div>
+        <div class="ig-card-likes">328 personas más</div>
+        <div class="ig-card-caption"><b>los.skeepers</b>JUANILLO REGUETÓN RELEASE PARTY 🚨 entrada gratis, 27 de marzo, 7PM en La Popular — vamos a rifar merch entre los primeros 50</div>
+        <div class="ig-card-comments">Ver los 14 comentarios</div>
+        <div class="ig-card-addcomment">◯ Añade un comentario...</div>
+      </div>
+      <div class="show-meta">
+        <span class="eyebrow">27 marzo</span>
+        <h3>Juanillo Reguetón — Release Party</h3>
+        <p>La Popular, 4 Grados Norte</p>
+      </div>
+    </div>
+    <div class="show-card">
+      <div class="ig-card">
+        <div class="ig-card-head">
+          <div class="ig-avatar" style="background:var(--red);">C</div>
+          <div class="ig-card-uname"><b>cameodrive</b><span>Guatemala, GT</span></div>
+          <a class="ig-follow-btn" href="https://www.instagram.com/cameodrive/" target="_blank" rel="noopener">Ver perfil</a>
+        </div>
+        <img class="ig-card-photo" src="assets/ig-photo-cameodrive.jpg" alt="Cameo Dr. & Friends 2025">
+        <div class="ig-card-icons">♡ 💬 ➤ <span class="push">🔖</span></div>
+        <div class="ig-card-likes">Le gusta a los.skeepers y más</div>
+        <div class="ig-card-caption"><b>cameodrive</b>El line-up más caliente de la ciudad — celebrando nuestros XI años junto a las mejores propuestas del Valle, 16 de noviembre en El Ataque</div>
+        <div class="ig-card-comments">Ver comentarios</div>
+        <div class="ig-card-addcomment">◯ Añade un comentario...</div>
+      </div>
+      <div class="show-meta">
+        <span class="eyebrow">16 noviembre</span>
+        <h3>Cameo Dr. &amp; Friends 2025</h3>
+        <p>El Ataque — XI años de Cameo Drive</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- COUNTDOWN (junto al festival) -->
+  <div class="countdown-band reveal" style="margin:50px -6vw 0;">
+    <div class="countdown-label">
+      <span class="eyebrow">Próximo show</span>
+      <h3>Festival Barrilete '26 ★ La Guarida, Z4</h3>
+    </div>
+    <div class="countdown-units" id="countdown">
+      <div class="countdown-unit"><b id="cd-days">00</b><span>días</span></div>
+      <div class="countdown-unit"><b id="cd-hours">00</b><span>horas</span></div>
+      <div class="countdown-unit"><b id="cd-mins">00</b><span>min</span></div>
+      <div class="countdown-unit"><b id="cd-secs">00</b><span>seg</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- GALERIA -->
+<section id="galeria" class="reveal">
+  <div class="section-head">
+    <span class="eyebrow">En vivo</span>
+    <h2>Galería</h2>
+    <p>Fotos y clips de nuestros shows.</p>
+  </div>
+  <div class="glitch-gallery">
+    <div class="glitch-tile" style="background-image:url('assets/crowd-1.jpg')"><span>lleno total</span></div>
+    <div class="glitch-tile" style="background-image:url('assets/crowd-2.jpg')"><span>manos arriba</span></div>
+    <div class="glitch-tile" style="background-image:url('assets/discoball.jpg')"><span>disco ball</span></div>
+    <div class="glitch-tile glitch-video"><video autoplay muted loop playsinline><source src="assets/gallery/gallery-vid-01.mp4" type="video/mp4"></video><span>clip 01</span></div>
+    <div class="glitch-tile" style="background-image:url('assets/singer-mic.jpg')"><span>en el mic</span></div>
+    <div class="glitch-tile glitch-video"><video autoplay muted loop playsinline><source src="assets/gallery/gallery-vid-02.mp4" type="video/mp4"></video><span>clip 02</span></div>
+    <div class="glitch-tile" style="background-image:url('assets/flashlights.jpg')"><span>luces arriba</span></div>
+    <div class="glitch-tile glitch-video"><video autoplay muted loop playsinline><source src="assets/gallery/gallery-vid-03.mp4" type="video/mp4"></video><span>clip 03</span></div>
+    <div class="glitch-tile" style="background-image:url('assets/fan-closeup.jpg')"><span>con la gente</span></div>
+    <div class="glitch-tile glitch-video"><video autoplay muted loop playsinline><source src="assets/gallery/gallery-vid-04.mp4" type="video/mp4"></video><span>clip 04</span></div>
+    <div class="glitch-tile glitch-video"><video autoplay muted loop playsinline><source src="assets/gallery/gallery-vid-05.mp4" type="video/mp4"></video><span>clip 05</span></div>
+    <div class="glitch-tile glitch-video"><video autoplay muted loop playsinline><source src="assets/gallery/gallery-vid-06.mp4" type="video/mp4"></video><span>clip 06</span></div>
+    <div class="glitch-tile glitch-video"><video autoplay muted loop playsinline><source src="assets/gallery/gallery-vid-07.mp4" type="video/mp4"></video><span>clip 07</span></div>
+    <div class="glitch-tile glitch-video"><video autoplay muted loop playsinline><source src="assets/gallery/gallery-vid-08.mp4" type="video/mp4"></video><span>clip 08</span></div>
+    <div class="glitch-tile glitch-video"><video autoplay muted loop playsinline><source src="assets/gallery/gallery-vid-09.mp4" type="video/mp4"></video><span>clip 09</span></div>
+    <div class="glitch-tile glitch-video"><video autoplay muted loop playsinline><source src="assets/gallery/gallery-vid-10.mp4" type="video/mp4"></video><span>clip 10</span></div>
+  </div>
+</section>
+
+<!-- MURO DE FANS -->
+<section id="fans" class="reveal">
+  <img src="assets/char-4.png" class="floating-char" style="top:-20px;left:0;" alt="">
+  <div class="section-head">
+    <span class="eyebrow">Ustedes</span>
+    <h2>Muro de Fans</h2>
+    <p>La gente que hace esto posible.</p>
+  </div>
+  <div class="fans-grid reveal-stagger">
+    <div class="fan-tile"><img src="assets/fan-1.jpg" alt="Fans de Los Skeepers"></div>
+    <div class="fan-tile"><img src="assets/fan-2.jpg" alt="Fans de Los Skeepers"></div>
+    <div class="fan-tile"><img src="assets/fan-3.jpg" alt="Fans de Los Skeepers"></div>
+    <div class="fan-tile"><img src="assets/fan-4.jpg" alt="Fans de Los Skeepers"></div>
+    <div class="fan-tile"><img src="assets/fan-5.jpg" alt="Fans de Los Skeepers"></div>
+    <div class="fan-tile"><img src="assets/fan-6.jpg" alt="Fans de Los Skeepers"></div>
+    <div class="fan-tile"><img src="assets/fan-7.jpg" alt="Fans de Los Skeepers"></div>
+    <div class="fan-tile"><img src="assets/crowd-1.jpg" alt="Fans de Los Skeepers"></div>
+  </div>
+</section>
+<section id="integrantes" class="reveal">
+  <div class="section-head">
+    <span class="eyebrow">La banda</span>
+    <h2>Integrantes</h2>
+    <p>Seis personas, seis playlists. Toca a cada uno para conocerlo.</p>
+  </div>
+  <div class="members-grid reveal-stagger" id="members-grid"></div>
+</section>
+
+<!-- MERCH -->
+<section id="merch" class="reveal">
+  <img src="assets/char-5.png" class="floating-char" style="top:10px;right:0;" alt="">
+  <div class="section-head">
+    <span class="eyebrow">Tienda</span>
+    <h2>Merch</h2>
+    <p>Ropa y accesorios oficiales. Escríbenos por Instagram para comprar — fotos de producto muy pronto.</p>
+  </div>
+  <div class="merch-ticker">
+    <div class="marquee-track">
+      <span>ENVÍOS A TODO GUATEMALA (CASI)</span><span>CANTIDADES LIMITADAS</span><span>TIENDA OFICIAL</span>
+      <span>ENVÍOS A TODO GUATEMALA (CASI)</span><span>CANTIDADES LIMITADAS</span><span>TIENDA OFICIAL</span>
+    </div>
+  </div>
+  <div class="merch-grid reveal-stagger">
+    <div class="merch-card">
+      <div class="merch-thumb">Foto próximamente</div>
+      <div class="merch-info"><h3>Playera Star Tee</h3><p class="price">Q--</p></div>
+    </div>
+    <div class="merch-card">
+      <div class="merch-thumb">Foto próximamente</div>
+      <div class="merch-info"><h3>Gorra Los Skeepers</h3><p class="price">Q--</p></div>
+    </div>
+    <div class="merch-card">
+      <div class="merch-thumb">Foto próximamente</div>
+      <div class="merch-info"><h3>Hoodie Skeeper-Lotería</h3><p class="price">Q--</p></div>
+    </div>
+  </div>
+  <div style="text-align:center;margin-top:36px;">
+    <a class="btn red" href="https://www.instagram.com/direct/t/17843460963523691/" target="_blank" rel="noopener">Pedir por Instagram →</a>
+  </div>
+</section>
+
+<!-- PRENSA -->
+<section id="prensa" class="reveal">
+  <img src="assets/char-6.png" class="floating-char" style="top:-20px;left:-10px;" alt="">
+  <div class="section-head">
+    <span class="eyebrow">Nos mencionaron</span>
+    <h2>Prensa</h2>
+  </div>
+  <div class="press-grid">
+    <div class="press-card">
+      <div class="press-photo"><img src="assets/press-dca.jpg" alt="Los Skeepers en vivo"></div>
+      <div class="press-card-body">
+        <div class="press-source"><span class="dot"></span>Diario de Centro América</div>
+        <h3>Los Skeepers y el valor de probar</h3>
+        <p>Un perfil sobre cómo la banda pasó de ensayos nocturnos improvisados a construir una audiencia real: ya suman cinco canciones publicadas y cerca de 20 mil oyentes mensuales.</p>
+        <p class="press-meta">Isa Enríquez · 20 enero, 2026</p>
+        <a class="btn small alt" href="https://dca.gob.gt/noticias-guatemala-diario-centro-america/los-skeepers-y-el-valor-de-probar/" target="_blank" rel="noopener">Leer nota completa →</a>
+      </div>
+    </div>
+    <div class="press-card">
+      <div class="press-photo"><img src="assets/press-npr.jpg" alt="Fabuloso"></div>
+      <div class="press-card-body">
+        <div class="press-source"><span class="dot"></span>NPR Music — Alt.Latino</div>
+        <h3>Salsa, bossa nova y lo nuevo de Argentina</h3>
+        <p>NPR Music incluyó "Si Te Gusta", junto a Fabuloso, en su repaso de las voces más interesantes de la música latina actual — al lado de nombres como Nathy Peluso y Mon Laferte.</p>
+        <p class="press-meta">Felix Contreras &amp; Anamaria Sayre · 29 octubre, 2025</p>
+        <a class="btn small alt" href="https://www.npr.org/2025/10/29/nx-s1-5589243/salsa-bossa-nova-and-argentinas-next-big-thing" target="_blank" rel="noopener">Leer nota completa →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- VIDEOS -->
+<section id="videos" class="reveal">
+  <div class="section-head">
+    <span class="eyebrow">Míranos</span>
+    <h2>Videos</h2>
+    <p>Lo último en YouTube.</p>
+  </div>
+  <div class="shows-grid" style="grid-template-columns:repeat(2,1fr);">
+    <div style="border:var(--line) solid var(--ink);border-radius:16px;overflow:hidden;aspect-ratio:16/9;">
+      <iframe width="100%" height="100%" src="https://www.youtube.com/embed/hPMhlVQru78" title="Los Skeepers" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="display:block;"></iframe>
+    </div>
+    <div style="border:var(--line) solid var(--ink);border-radius:16px;overflow:hidden;aspect-ratio:16/9;">
+      <iframe width="100%" height="100%" src="https://www.youtube.com/embed/PPI9li8HsWs" title="Los Skeepers" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="display:block;"></iframe>
+    </div>
+  </div>
+</section>
+
+<!-- DETRAS DE CAMARAS / CREATIVO -->
+<section id="detras" class="reveal">
+  <div class="section-head">
+    <span class="eyebrow">Zona libre</span>
+    <h2>Detrás de cámaras</h2>
+    <p>El scrapbook oficial. Sin reglas.</p>
+  </div>
+  <img src="assets/collage-art.jpg" alt="Collage creativo Los Skeepers" style="border:var(--line) solid var(--ink);transform:rotate(-1deg);">
+  <div class="fans-grid" style="grid-template-columns:repeat(2,1fr);margin-top:22px;">
+    <div class="fan-tile" style="aspect-ratio:4/3;"><img src="assets/bts-1.jpg" alt="En el estudio"></div>
+    <div class="fan-tile" style="aspect-ratio:4/3;"><img src="assets/bts-2.jpg" alt="Grabando en el estudio"></div>
+  </div>
+</section>
+
+<!-- SEGUIR -->
+<section id="seguir" class="reveal">
+  <div class="follow">
+    <span class="eyebrow" style="color:var(--mustard);">No te pierdas nada</span>
+    <h2>Síguenos</h2>
+    <div class="follow-links">
+      <a class="btn" href="https://www.instagram.com/p/DV2Agbwj_4O/" target="_blank" rel="noopener">Instagram</a>
+      <a class="btn alt" href="https://www.tiktok.com/@losskeepers" target="_blank" rel="noopener">TikTok</a>
+      <a class="btn red" href="https://www.youtube.com/channel/UC4iGkgYty-UUlRz9sGtw4Gg" target="_blank" rel="noopener">YouTube</a>
+      <a class="btn dark" href="https://open.spotify.com/artist/3q9JMhPqxoWXTqoYfJs2RP" target="_blank" rel="noopener">Spotify</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <img src="assets/star-logo.png" alt="">
+  Los Skeepers — Guatemala. Sitio hecho con ★ para la primera boy band del país.
+</footer>
+</div>
+
+<a class="shop-fab" href="#merch">★ SHOP</a>
+
+<!-- MEMBER OVERLAY (funciona como "otra página" sin salir del archivo) -->
+<div class="member-overlay" id="member-overlay">
+  <a class="btn small alt member-close" id="member-close">✕ Cerrar</a>
+  <header class="member-hero">
+    <img src="assets/group-hero.jpg" alt="">
+    <div class="member-hero-content">
+      <span class="eyebrow" id="m-eyebrow">Integrante · Los Skeepers</span>
+      <h1 id="m-name">—</h1>
+    </div>
+  </header>
+  <div class="member-body">
+    <p id="m-bio">Cargando...</p>
+    <div class="member-playlist">
+      <iframe id="m-playlist" height="352" allowfullscreen loading="lazy" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>
+    </div>
+  </div>
+  <div class="member-nav-strip" id="m-nav"></div>
+</div>
+
+<script>
+let prefersReducedMotion = false;
+try { prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch(e) {}
+
+// ---- floating member cutouts: wobble while scrolling, spring back upright ----
+try {
+const floatChars = document.querySelectorAll('.floating-char');
+if (floatChars.length && !prefersReducedMotion) {
+  let lastY = window.scrollY;
+  let wobbleTimeout;
+  window.addEventListener('scroll', () => {
+    const currentY = window.scrollY;
+    const delta = currentY - lastY;
+    lastY = currentY;
+    const angle = Math.max(-16, Math.min(16, delta * 1.4));
+    floatChars.forEach(c => {
+      c.style.transition = 'transform 0.12s linear';
+      c.style.transform = `rotate(${angle}deg)`;
+    });
+    clearTimeout(wobbleTimeout);
+    wobbleTimeout = setTimeout(() => {
+      floatChars.forEach(c => {
+        c.style.transition = 'transform 0.6s cubic-bezier(.34,1.56,.64,1)';
+        c.style.transform = 'rotate(0deg)';
+      });
+    }, 150);
+  }, { passive: true });
+}
+} catch(e) { console.error(e); }
+
+// ---- side star spins with scroll ----
+try {
+const sideStar = document.getElementById('side-star');
+if (sideStar) {
+  window.addEventListener('scroll', () => {
+    sideStar.style.transform = `rotate(${window.scrollY * 0.35}deg)`;
+  }, { passive: true });
+}
+} catch(e) { console.error(e); }
+
+// ---- mobile nav toggle ----
+try {
+const navToggle = document.querySelector('.nav-toggle');
+const navLinks = document.querySelector('.nav-links');
+if (navToggle) {
+  navToggle.addEventListener('click', () => navLinks.classList.toggle('open'));
+  navLinks.querySelectorAll('a').forEach(a => a.addEventListener('click', () => navLinks.classList.remove('open')));
+}
+} catch(e) { console.error(e); }
+
+// ---- scroll reveal ----
+try {
+const revealEls = document.querySelectorAll('.reveal, .reveal-stagger');
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
+}, { threshold: 0.15 });
+revealEls.forEach(el => io.observe(el));
+} catch(e) { console.error(e); }
+
+// ---- countdown to Festival Barrilete '26 (1 agosto, 7pm) ----
+try {
+const showDate = new Date('2026-08-01T19:00:00-06:00').getTime();
+function tickCountdown(){
+  const now = Date.now();
+  const diff = showDate - now;
+  const el = document.getElementById('countdown');
+  if (!el) return;
+  if (diff <= 0){
+    document.querySelector('.countdown-band').innerHTML = '<div class="countdown-label"><span class="eyebrow">Hoy es el show</span><h3>¡Nos vemos en La Guarida! ★</h3></div>';
+    return;
+  }
+  const d = Math.floor(diff / 86400000);
+  const h = Math.floor((diff % 86400000) / 3600000);
+  const m = Math.floor((diff % 3600000) / 60000);
+  const s = Math.floor((diff % 60000) / 1000);
+  document.getElementById('cd-days').textContent = String(d).padStart(2,'0');
+  document.getElementById('cd-hours').textContent = String(h).padStart(2,'0');
+  document.getElementById('cd-mins').textContent = String(m).padStart(2,'0');
+  document.getElementById('cd-secs').textContent = String(s).padStart(2,'0');
+}
+tickCountdown();
+setInterval(tickCountdown, 1000);
+} catch(e) { console.error(e); }
+
+// ---- floating stars parallax ----
+try {
+const starsLayer = document.querySelector('.stars-layer');
+if (starsLayer && !prefersReducedMotion) {
+  const positions = [
+    {top:'8%', left:'6%'}, {top:'22%', left:'88%'}, {top:'55%', left:'12%'},
+    {top:'70%', left:'80%'}, {top:'40%', left:'50%'}, {top:'85%', left:'40%'}
+  ];
+  positions.forEach((p, i) => {
+    const s = document.createElement('img');
+    s.src = 'assets/star-logo.png';
+    s.className = 'floating-star';
+    s.style.top = p.top; s.style.left = p.left;
+    s.dataset.depth = (0.5 + i * 0.15).toFixed(2);
+    starsLayer.appendChild(s);
+  });
+  const stars = document.querySelectorAll('.floating-star');
+  window.addEventListener('mousemove', (e) => {
+    const cx = window.innerWidth / 2, cy = window.innerHeight / 2;
+    const dx = (e.clientX - cx) / cx, dy = (e.clientY - cy) / cy;
+    stars.forEach(s => {
+      const depth = parseFloat(s.dataset.depth);
+      s.style.transform = `translate(${dx * 20 * depth}px, ${dy * 20 * depth}px) rotate(${dx * 15}deg)`;
+    });
+  });
+}
+} catch(e) { console.error(e); }
+
+// ---- members data + grid render ----
+try {
+const MEMBERS = {
+  daniel:   { name: 'Daniel',   playlist: '2yKA9QVuVKaAzPqH6aajf8', bio: 'Su playlist es su tarjeta de presentación: lo que Daniel escucha antes de un show es lo que después escuchas en las canciones de Los Skeepers.' },
+  joaquin:  { name: 'Joaquín',  playlist: '7cobANqWUoRUSkn5IfzWi2', bio: 'Uno de los nombres que aparece una y otra vez en cada flyer de festival: Joaquín es de los que no se pierde un ensayo ni una tocada.' },
+  juanillo: { name: 'Juanillo', playlist: '7wM4w0jJSi7ADwIZTjtSsc', bio: 'El del "Juanillo Reguetón" — su release party llenó La Popular. Su playlist es la mejor pista de por dónde va su próximo sonido.' },
+  jeremy:   { name: 'Jeremy',   playlist: '5sWrzbPofUbVXha6HQ1CUo', bio: 'Parte del núcleo original de Los Skeepers, de los ensayos nocturnos que arrancaron todo esto.' },
+  alex:     { name: 'Alex',     playlist: '6FMAhlFnUw1eSd7cgNeNeq', bio: 'Otro de los seis que sube al escenario cada vez que hay show. Su playlist, directo de sus audífonos a los tuyos.' },
+  chipi:    { name: 'Chipi',    playlist: '2FxuQuEXXCwFMI5vAOapNd', bio: 'Chipi, tal como lo conoce la banda. Su playlist mezcla lo que suena en el cuarto de ensayo con lo que suena camino al show.' }
+};
+
+const grid = document.getElementById('members-grid');
+Object.entries(MEMBERS).forEach(([slug, m]) => {
+  const card = document.createElement('a');
+  card.className = 'member-card';
+  card.href = `#${slug}`;
+  card.innerHTML = `<img src="assets/group-hero.jpg" alt="${m.name}"><span class="member-tag">${m.name}</span>`;
+  card.addEventListener('click', (e) => { e.preventDefault(); openMember(slug); });
+  grid.appendChild(card);
+});
+
+const overlay = document.getElementById('member-overlay');
+function openMember(slug){
+  const data = MEMBERS[slug] || MEMBERS.daniel;
+  document.getElementById('m-name').textContent = data.name;
+  document.getElementById('m-bio').textContent = data.bio;
+  document.getElementById('m-playlist').src = `https://open.spotify.com/embed/playlist/${data.playlist}?utm_source=generator`;
+
+  const nav = document.getElementById('m-nav');
+  nav.innerHTML = '';
+  Object.entries(MEMBERS).forEach(([s, m]) => {
+    const a = document.createElement('a');
+    a.href = '#' + s;
+    a.className = 'btn small ' + (s === slug ? 'dark' : 'alt');
+    a.textContent = m.name;
+    a.addEventListener('click', (e) => { e.preventDefault(); openMember(s); });
+    nav.appendChild(a);
+  });
+
+  const wasOpen = overlay.classList.contains('open');
+  overlay.classList.add('open');
+  document.body.classList.add('lock');
+  if (!wasOpen) overlay.scrollTop = 0;
+  history.replaceState(null, '', '#' + slug);
+}
+function closeMember(){
+  overlay.classList.remove('open');
+  document.body.classList.remove('lock');
+  document.getElementById('m-playlist').src = '';
+  history.replaceState(null, '', '#integrantes');
+}
+document.getElementById('member-close').addEventListener('click', closeMember);
+
+// open directly if URL already has a member hash (shareable link)
+window.addEventListener('DOMContentLoaded', () => {
+  const hash = window.location.hash.replace('#', '');
+  if (MEMBERS[hash]) openMember(hash);
+});
+} catch(e) { console.error(e); }
+
+</script>
+</body>
+</html>
