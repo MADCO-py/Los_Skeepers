@@ -460,9 +460,17 @@ section{position:relative;padding:100px 6vw;max-width:1360px;margin:0 auto;}
 
 /* ---- MONTAJE ---- */
 .montaje-box{
-  display:grid;grid-template-columns:1.15fr 0.85fr;gap:40px;
+  display:grid;
+  grid-template-columns:1.15fr 0.85fr;
+  grid-template-areas:
+    "photo controls"
+    "actions controls";
+  gap:40px;
   max-width:940px;margin:0 auto;align-items:start;
 }
+.montaje-photo-block{grid-area:photo;}
+.montaje-controls{grid-area:controls;}
+.montaje-final-actions{grid-area:actions;}
 .montaje-canvas-wrap{
   position:relative;background:
     repeating-conic-gradient(var(--paper) 0% 25%, #F0E6CC 0% 50%) 50% / 22px 22px;
@@ -528,10 +536,10 @@ section{position:relative;padding:100px 6vw;max-width:1360px;margin:0 auto;}
 #montaje-download[disabled]{transform:none;}
 
 @media (max-width:800px){
-  .montaje-box{grid-template-columns:1fr;}
+  .montaje-box{grid-template-columns:1fr;grid-template-areas:"photo" "controls" "actions";}
   .montaje-canvas-wrap{transform:none;}
   .control-block, .control-block:nth-child(2){transform:none;}
-  .montaje-stickers{grid-template-columns:repeat(6,1fr);}
+  .montaje-stickers{grid-template-columns:repeat(3,1fr);}
 }
 @media (max-width:600px){
   .quiz-box{padding:32px 5vw;}
@@ -696,8 +704,7 @@ section{position:relative;padding:100px 6vw;max-width:1360px;margin:0 auto;}
   border:2px solid var(--ink);border-radius:30px;padding:8px 16px;
   font-family:'Anton';font-size:1.1rem;transform:rotate(-2deg);color:var(--ink);
 }
-@media (max-width:900px){.members-grid{grid-template-columns:1fr 1fr;}}
-@media (max-width:560px){.members-grid{grid-template-columns:repeat(3,1fr);gap:8px;}
+@media (max-width:560px){.members-grid{gap:8px;}
   .member-card{aspect-ratio:1/1;}
   .member-tag{font-size:0.62rem;padding:3px 7px;left:5px;bottom:5px;border-width:1px;}}
 
@@ -892,14 +899,14 @@ footer .credit a:hover{opacity:0.8;}
 .member-hero-content{position:relative;z-index:2;padding:60px 6vw;color:var(--paper);}
 .member-hero-content h1{font-size:clamp(3rem,10vw,7rem);color:var(--paper);-webkit-text-stroke:2px var(--ink);}
 .member-deco{position:absolute;inset:0;z-index:1;pointer-events:none;overflow:hidden;}
-.member-deco-item{position:absolute;opacity:0.85;filter:drop-shadow(2px 3px 5px rgba(0,0,0,0.5));animation:memberDecoSpin linear infinite;}
+.member-deco-item{position:absolute;opacity:0.85;filter:drop-shadow(2px 3px 5px rgba(0,0,0,0.5));animation:memberDecoSpin linear infinite;height:auto;}
 @keyframes memberDecoSpin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
 body.no-motion .member-deco-item{animation:none !important;}
 .member-deco-1{top:10%;right:6%;width:56px;animation-duration:10s;}
 .member-deco-2{bottom:8%;right:14%;width:70px;animation-duration:14s;animation-direction:reverse;}
 .member-deco-3{top:14%;left:4%;width:60px;animation-duration:12s;}
 .member-deco-4{bottom:12%;left:10%;width:44px;animation-duration:9s;animation-direction:reverse;}
-@media (max-width:700px){.member-deco-item{width:34px !important;}}
+@media (max-width:700px){.member-deco-item{width:30px !important;max-width:30px !important;height:auto !important;}}
 .member-close{
   position:fixed;top:20px;right:20px;z-index:510;
 }
@@ -1044,7 +1051,6 @@ body.no-motion .member-deco-item{animation:none !important;}
   .reveal, .reveal-stagger, .reveal-stagger > *{opacity:1 !important;transform:none !important;}
   /* keep nothing poking past the viewport edge (avoids a few px of horizontal drift) */
   html, body{width:100%;overflow-x:hidden;}
-  .shop-fab{right:14px !important;}
 }
 
 /* ---- SHARP CORNERS: override every rounded edge in the system ---- */
@@ -1102,16 +1108,6 @@ body.no-motion .member-deco-item{animation:none !important;}
 .stat:nth-child(2){transform:rotate(2deg);}
 .stat:nth-child(3){transform:rotate(-2deg);}
 
-/* ---- shop cta sticker (fixed) ---- */
-.shop-fab{
-  position:fixed;bottom:26px;right:26px;z-index:150;
-  background:var(--red);color:var(--cream);border:var(--line) solid var(--ink);
-  padding:14px 20px;font-family:'Anton';font-size:1rem;transform:rotate(-4deg) translateZ(0);
-  box-shadow:5px 5px 0 var(--ink);transition:transform 0.2s ease;
-  will-change:transform;backface-visibility:hidden;
-}
-.shop-fab:hover{transform:rotate(0deg) scale(1.05) translateZ(0);}
-@media (max-width:600px){.shop-fab{padding:10px 16px;font-size:0.85rem;bottom:16px;right:16px;}}
 .page-content{position:relative;z-index:2;background:var(--cream);margin-top:100svh;}
 </style>
 </head>
@@ -1543,7 +1539,7 @@ body.no-motion .member-deco-item{animation:none !important;}
   </div>
 
   <div class="montaje-box xp-glitch-target">
-    <div>
+    <div class="montaje-photo-block">
       <div class="montaje-canvas-wrap" id="montaje-canvas-wrap">
         <div class="montaje-empty" id="montaje-empty">
           <span>📷</span>
@@ -1555,11 +1551,6 @@ body.no-motion .member-deco-item{animation:none !important;}
 
       <input type="file" id="montaje-upload" accept="image/*" hidden>
       <button class="btn" id="montaje-upload-btn" style="width:100%;justify-content:center;margin-top:16px;">Subir tu foto →</button>
-      <div class="montaje-actions">
-        <button class="btn small alt" id="montaje-delete">✕ Quitar seleccionado</button>
-        <button class="btn small alt" id="montaje-reset">↺ Reiniciar</button>
-      </div>
-      <button class="btn red" id="montaje-download" style="width:100%;justify-content:center;margin-top:10px;" disabled>Descargar tu montaje ↓</button>
     </div>
 
     <div class="montaje-controls">
@@ -1576,6 +1567,14 @@ body.no-motion .member-deco-item{animation:none !important;}
           <button class="frame-opt" data-frame="polaroid">Polaroid</button>
         </div>
       </div>
+    </div>
+
+    <div class="montaje-final-actions">
+      <div class="montaje-actions">
+        <button class="btn small alt" id="montaje-delete">✕ Quitar seleccionado</button>
+        <button class="btn small alt" id="montaje-reset">↺ Reiniciar</button>
+      </div>
+      <button class="btn red" id="montaje-download" style="width:100%;justify-content:center;margin-top:10px;" disabled>Descargar tu montaje ↓</button>
     </div>
   </div>
 </section>
@@ -1611,7 +1610,6 @@ body.no-motion .member-deco-item{animation:none !important;}
 </footer>
 </div>
 
-<a class="shop-fab" href="#merch">★ SHOP</a>
 
 <!-- MEMBER OVERLAY (funciona como "otra página" sin salir del archivo) -->
 <div class="member-overlay" id="member-overlay">
