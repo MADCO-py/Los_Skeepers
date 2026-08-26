@@ -64,6 +64,182 @@ img{max-width:100%;display:block;}
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
+/* ---- GLITCH XP: se intensifica progresivamente con el scroll de toda la página ---- */
+:root{ --glitch: 0; }
+.glitch-overlay{
+  position:fixed;inset:0;z-index:2;pointer-events:none;overflow:hidden;
+}
+.glitch-wallpaper{
+  position:fixed;inset:0;z-index:2;
+  background:url('assets/xp-bliss-wallpaper.jpg') center/cover no-repeat;
+  opacity:calc(var(--glitch) * 1);
+  pointer-events:none;
+}
+.wallpaper-crew{position:absolute;inset:0;overflow:hidden;}
+.wallpaper-crew-item{
+  position:absolute;bottom:32%;width:9vw;max-width:70px;min-width:34px;
+  filter:drop-shadow(0 6px 6px rgba(0,0,0,0.35));
+}
+@media (max-width:700px){.wallpaper-crew-item{bottom:26%;}}
+.page-content{background:var(--cream);transition:background-color 0.15s linear;}
+body.glitch-low .page-content{background:rgba(251,243,225,0.82);}
+body.glitch-mid .page-content{background:rgba(251,243,225,0.6);}
+body.glitch-high .page-content{background:rgba(251,243,225,0.4);}
+body.glitch-max .page-content{background:rgba(251,243,225,0.28);}
+/* el hero es fixed y vive detrás de todo; se apaga rápido y por completo apenas
+   se termina la transición inicial, para que nunca se cuele por transparencia después */
+:root{ --hero-fade: 0; }
+.glitch-scanlines{
+  position:absolute;inset:0;
+  background-image:repeating-linear-gradient(0deg, rgba(200,220,255,0.55) 0px, rgba(200,220,255,0.55) 1px, transparent 1px, transparent 3px);
+  opacity:calc(var(--glitch) * 0.3);
+  mix-blend-mode:overlay;
+}
+.glitch-tint{
+  position:absolute;inset:0;
+  background:linear-gradient(180deg, rgba(0,20,180,0) 0%, rgba(0,30,190,0.3) 45%, rgba(0,10,140,0.62) 100%);
+  opacity:calc(var(--glitch) * 0.95);
+  mix-blend-mode:hard-light;
+  transition:opacity 0.1s linear;
+}
+.glitch-rgb{
+  position:absolute;inset:0;opacity:0;mix-blend-mode:screen;
+  background:repeating-linear-gradient(90deg, rgba(255,0,60,0.6) 0px, transparent 2px, transparent 4px, rgba(0,180,255,0.65) 4px, transparent 6px);
+}
+body.glitch-mid .glitch-rgb{opacity:calc((var(--glitch) - 0.3) * 0.4);}
+body.glitch-high .glitch-rgb{opacity:calc((var(--glitch) - 0.4) * 0.65);}
+body.glitch-max .glitch-rgb{animation:glitchRgbJitter 0.3s steps(2) infinite;}
+@keyframes glitchRgbJitter{0%{transform:translate(0,0);}50%{transform:translate(-4px,2px);}100%{transform:translate(3px,-1px);}}
+
+.glitch-text{
+  position:absolute;color:#fff;font-family:'JetBrains Mono',monospace;
+  font-size:0.72rem;line-height:1.5;text-shadow:2px 0 #ff2650, -2px 0 #00d4ff;
+  opacity:0;transition:opacity 0.4s ease;white-space:pre-line;max-width:60vw;
+}
+.glitch-text-1{top:14%;left:4vw;}
+.glitch-text-2{top:38%;right:4vw;text-align:right;}
+.glitch-text-3{top:58%;left:4vw;}
+.glitch-text-4{top:74%;right:4vw;text-align:right;}
+.glitch-text-5{top:88%;left:4vw;}
+.glitch-text-6{top:96%;right:4vw;text-align:right;}
+body.glitch-low .glitch-text-1{opacity:calc(var(--glitch) * 0.9);}
+body.glitch-mid .glitch-text-1,body.glitch-mid .glitch-text-2{opacity:calc(var(--glitch) * 0.9);}
+body.glitch-high .glitch-text-1,body.glitch-high .glitch-text-2,body.glitch-high .glitch-text-3,body.glitch-high .glitch-text-4{opacity:calc(var(--glitch) * 0.95);}
+body.glitch-max .glitch-text{opacity:1;}
+
+body.glitch-max .glitch-overlay{animation:glitchFlicker 2.4s steps(1) infinite;}
+@keyframes glitchFlicker{
+  0%,89%,100%{filter:none;}
+  90%{filter:invert(1) hue-rotate(30deg);}
+  91%{filter:none;}
+  93%{filter:contrast(2.4) brightness(0.7);transform:translate(4px,0);}
+  94%{filter:none;transform:none;}
+  96%{filter:hue-rotate(180deg);}
+  97%{filter:none;}
+}
+body.no-motion .glitch-overlay{animation:none !important;}
+
+/* glitch existente en la galería, ahora también se dispara solo con el scroll, no solo hover */
+body.glitch-mid .glitch-tile::before{opacity:calc((var(--glitch) - 0.35) * 1.3);animation:glitchA 0.4s steps(2) infinite;}
+body.glitch-mid .glitch-tile::after{opacity:calc((var(--glitch) - 0.35) * 1.3);animation:glitchB 0.4s steps(2) infinite;}
+body.glitch-high .glitch-tile::before,body.glitch-high .glitch-tile::after{animation-duration:0.2s;}
+body.glitch-mid .glitch-video video{animation:videoGlitch 0.5s steps(2) infinite;}
+body.glitch-high .glitch-video video{animation-duration:0.22s;}
+
+/* bordes con interferencia en tarjetas clave (integrantes, merch, prensa) */
+body.glitch-high .member-card,body.glitch-high .merch-thumb,body.glitch-high .press-photo{
+  box-shadow:0 0 0 2px rgba(255,0,60,0.5), 0 0 0 4px rgba(0,220,255,0.35);
+}
+
+/* ---- "bugs" de Windows XP: algunos cuadros se corrompen al estilo XP, otros se quedan normales ---- */
+.xp-glitch-target{position:relative;}
+body.glitch-mid .quiz-box.xp-glitch-target,
+body.glitch-mid .montaje-box.xp-glitch-target,
+body.glitch-high .press-card.xp-glitch-target:nth-of-type(odd),
+body.glitch-high .merch-card.xp-glitch-target:nth-of-type(3n),
+body.glitch-high .ig-card.xp-glitch-target:nth-of-type(even){
+  outline:2px solid #003c74;outline-offset:0;
+  border:1px solid #0831d9 !important;
+  background:#ece9d8 !important;
+  box-shadow:4px 4px 0 rgba(0,20,120,0.5), inset 0 0 0 1px #fff !important;
+  filter:saturate(0.75) contrast(1.05);
+  padding-top:40px !important;
+}
+body.glitch-mid .montaje-box.xp-glitch-target{padding:40px 20px 46px !important;}
+body.glitch-mid .quiz-box.xp-glitch-target::before,
+body.glitch-mid .montaje-box.xp-glitch-target::before,
+body.glitch-high .press-card.xp-glitch-target:nth-of-type(odd)::before,
+body.glitch-high .merch-card.xp-glitch-target:nth-of-type(3n)::before,
+body.glitch-high .ig-card.xp-glitch-target:nth-of-type(even)::before{
+  content:'Los_Skeepers.exe';
+  position:absolute;top:0;left:0;right:0;height:22px;z-index:4;
+  background:linear-gradient(180deg,#4198fa 0%,#1a5ce0 15%,#0a3ea8 55%,#001c66 100%);
+  color:#fff;font-family:Tahoma,'Segoe UI',sans-serif;font-size:0.62rem;font-weight:700;
+  display:flex;align-items:center;padding:0 9px;letter-spacing:0.3px;
+  border-bottom:1px solid #001238;
+}
+body.glitch-mid .quiz-box.xp-glitch-target::after,
+body.glitch-mid .montaje-box.xp-glitch-target::after,
+body.glitch-high .press-card.xp-glitch-target:nth-of-type(odd)::after,
+body.glitch-high .merch-card.xp-glitch-target:nth-of-type(3n)::after,
+body.glitch-high .ig-card.xp-glitch-target:nth-of-type(even)::after{
+  content:'File  Edit  View  Help';position:absolute;top:22px;left:0;right:0;height:18px;z-index:4;
+  display:flex;align-items:center;color:#000;font-family:Tahoma,sans-serif;
+  font-size:0.58rem;letter-spacing:1px;background:#ece9d8;padding:0 8px;
+  border-bottom:1px solid #aca899;
+}
+body.glitch-mid .montaje-box.xp-glitch-target{position:relative;}
+body.glitch-mid .montaje-box.xp-glitch-target .montaje-canvas-wrap::after{
+  content:'listo.';position:absolute;left:0;right:0;bottom:-24px;height:20px;
+  background:#ece9d8;border-top:1px solid #aca899;color:#555;
+  font-family:Tahoma,sans-serif;font-size:0.6rem;display:flex;align-items:center;padding:0 8px;
+}
+/* estilo XP completo por dentro del panel de montaje: nada de stickers brutalistas, todo Luna theme */
+body.glitch-mid .montaje-box.xp-glitch-target *{font-family:Tahoma,'Segoe UI',sans-serif !important;}
+body.glitch-mid .montaje-box.xp-glitch-target .btn{
+  background:linear-gradient(180deg,#fefefe 0%,#ece9d8 100%) !important;color:#000 !important;
+  border:1px solid #716f64 !important;border-radius:3px !important;
+  box-shadow:inset 1px 1px 0 #fff, 1px 1px 2px rgba(0,0,0,0.25) !important;
+  text-transform:none !important;font-weight:400 !important;font-size:0.78rem !important;
+  transform:none !important;letter-spacing:0 !important;
+}
+body.glitch-mid .montaje-box.xp-glitch-target .btn:hover{background:linear-gradient(180deg,#fff 0%,#f5f3ea 100%) !important;transform:none !important;}
+body.glitch-mid .montaje-box.xp-glitch-target .btn.red{
+  background:linear-gradient(180deg,#5ea1f2 0%,#0a3ea8 100%) !important;color:#fff !important;
+  border-color:#003c74 !important;
+}
+body.glitch-mid .montaje-box.xp-glitch-target .control-label{
+  color:#000 !important;font-weight:700 !important;font-size:0.72rem !important;
+  text-transform:none !important;letter-spacing:0 !important;
+}
+body.glitch-mid .montaje-box.xp-glitch-target .sticker-tab{
+  background:linear-gradient(180deg,#fefefe 0%,#ded9c4 100%) !important;
+  border:1px solid #716f64 !important;border-radius:3px 3px 0 0 !important;
+  color:#000 !important;box-shadow:none !important;text-transform:none !important;
+}
+body.glitch-mid .montaje-box.xp-glitch-target .sticker-tab::before{content:'';margin:0;}
+body.glitch-mid .montaje-box.xp-glitch-target .sticker-tab.active{
+  background:linear-gradient(180deg,#5ea1f2 0%,#0a3ea8 100%) !important;color:#fff !important;
+}
+body.glitch-mid .montaje-box.xp-glitch-target .frame-opt{
+  background:linear-gradient(180deg,#fefefe 0%,#ece9d8 100%) !important;
+  border:1px solid #716f64 !important;border-radius:3px !important;color:#000 !important;
+  box-shadow:inset 1px 1px 0 #fff !important;text-transform:none !important;
+}
+body.glitch-mid .montaje-box.xp-glitch-target .frame-opt.active{
+  background:linear-gradient(180deg,#5ea1f2 0%,#0a3ea8 100%) !important;color:#fff !important;
+}
+body.glitch-mid .montaje-box.xp-glitch-target .montaje-canvas-wrap{
+  background:repeating-conic-gradient(#c8c8c8 0% 25%, #9a9a9a 0% 50%) 50% / 16px 16px !important;
+  border:2px inset #838179 !important;box-shadow:none !important;
+}
+body.glitch-mid .montaje-box.xp-glitch-target .montaje-empty{color:#444 !important;opacity:1 !important;}
+body.glitch-mid .montaje-box.xp-glitch-target .montaje-hint{
+  color:#444 !important;font-size:0.68rem !important;
+}
+body.glitch-mid .montaje-box.xp-glitch-target #montaje-canvas{box-shadow:none !important;}
+
+
 .stars-layer{position:fixed;inset:0;pointer-events:none;z-index:5;overflow:hidden;}
 .floating-star{
   position:absolute;width:26px;height:26px;opacity:0.55;
@@ -85,23 +261,24 @@ img{max-width:100%;display:block;}
   transform-origin:bottom center;
   transition:transform 0.5s cubic-bezier(.34,1.56,.64,1);
 }
-.char-about{top:-30px;right:0;}
+.char-integrantes{top:-30px;right:0;}
 .char-musica{top:20px;left:-10px;}
 .char-shows{top:0;right:-10px;}
 .char-fans{top:-20px;left:0;}
+.char-quiz{top:-24px;right:-6px;}
+.char-montaje{top:-20px;left:-8px;}
 .char-merch{top:10px;right:0;}
 .char-prensa{top:-20px;left:-10px;}
+.char-exclusivo{top:-16px;left:-8px;}
 
 @media (max-width:820px){
   .floating-char{
     position:static !important;
     display:block;
-    float:right;
-    width:64px;
-    margin:0 0 12px 14px;
+    width:56px;
+    margin:0 0 14px auto;
     opacity:0.95;
   }
-  .section-head + *{clear:both;}
 }
 
 .nav{
@@ -136,6 +313,7 @@ img{max-width:100%;display:block;}
   position:fixed;inset:0;height:100svh;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   overflow:hidden;background:var(--ink);z-index:1;
+  opacity:calc(1 - var(--hero-fade, 0));
 }
 .hero video{
   position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0.55;
@@ -178,6 +356,8 @@ img{max-width:100%;display:block;}
 
 section{position:relative;padding:100px 6vw;max-width:1360px;margin:0 auto;}
 .section-head{margin-bottom:44px;max-width:640px;}
+.shows-subhead{margin-bottom:26px;}
+.shows-subhead h3{font-family:'Anton',sans-serif;text-transform:uppercase;font-size:clamp(1.4rem,3vw,2rem);}
 .section-head h2{font-size:clamp(2.2rem,5vw,4rem);margin-top:6px;}
 .section-head p{font-family:'Space Grotesk';font-size:1.05rem;color:var(--ink);opacity:0.8;margin-top:12px;}
 
@@ -203,6 +383,160 @@ section{position:relative;padding:100px 6vw;max-width:1360px;margin:0 auto;}
 .btn.outline:hover{box-shadow:2px 2px 0 var(--cream);}
 .btn.red{background:var(--red);color:var(--cream);}
 .btn.small{padding:8px 16px;font-size:0.72rem;}
+.btn[disabled]{opacity:0.4;pointer-events:none;}
+
+/* ---- QUIZ ---- */
+.quiz-box{
+  max-width:640px;margin:0 auto;background:var(--paper);
+  border:var(--line) solid var(--ink);box-shadow:8px 8px 0 var(--ink);
+  padding:44px 6vw;position:relative;
+}
+.quiz-panel{text-align:center;}
+.quiz-intro-text{font-size:1.15rem;line-height:1.6;margin-bottom:26px;}
+.quiz-progress{height:10px;background:var(--cream);border:2px solid var(--ink);margin-bottom:10px;overflow:hidden;}
+.quiz-progress-bar{height:100%;background:var(--red);width:0%;transition:width 0.35s ease;}
+.quiz-step-label{font-family:'JetBrains Mono',monospace;font-size:0.75rem;text-transform:uppercase;letter-spacing:1px;opacity:0.6;margin-bottom:18px;text-align:left;}
+.quiz-question{font-size:clamp(1.4rem,3.4vw,2rem);margin-bottom:26px;text-align:left;}
+.quiz-options{display:flex;flex-direction:column;gap:12px;}
+.quiz-option{
+  display:flex;align-items:center;gap:14px;text-align:left;
+  background:var(--cream);border:var(--line) solid var(--ink);
+  padding:14px 18px;cursor:pointer;font-family:'Space Grotesk';font-size:1rem;
+  transition:transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+  box-shadow:3px 3px 0 var(--ink);
+}
+.quiz-option:hover{transform:translate(-2px,-2px);box-shadow:5px 5px 0 var(--ink);background:var(--mustard);}
+.quiz-option img{width:56px;height:56px;object-fit:cover;border:2px solid var(--ink);flex-shrink:0;}
+.quiz-options.photo-options{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.quiz-options.photo-options .quiz-option{flex-direction:column;text-align:center;padding:10px;gap:8px;}
+.quiz-options.photo-options .quiz-option img{width:100%;height:150px;object-fit:cover;border-radius:0;}
+@media (max-width:600px){.quiz-options.photo-options{grid-template-columns:1fr 1fr;}}
+
+.result-card{
+  background:var(--ink);color:var(--cream);padding:40px 30px;
+  border:var(--line) solid var(--ink);position:relative;overflow:hidden;
+}
+.result-card .eyebrow{color:var(--mustard);}
+.result-card img{
+  width:180px;height:180px;object-fit:cover;border-radius:50%;
+  border:5px solid var(--mustard);margin:16px auto;display:block;
+}
+.result-card h2{font-size:clamp(2.2rem,6vw,3.2rem);color:var(--paper);margin-top:6px;}
+.result-match{font-family:'JetBrains Mono',monospace;font-size:1rem;color:var(--mustard);font-weight:700;margin-top:6px;}
+.result-card p{font-family:'Space Grotesk';font-size:1rem;line-height:1.6;margin-top:16px;color:var(--cream);opacity:0.9;}
+.result-actions{display:flex;gap:14px;justify-content:center;margin-top:26px;flex-wrap:wrap;}
+
+/* share sheet */
+.share-sheet{
+  position:fixed;inset:0;z-index:600;background:rgba(25,21,18,0.55);
+  display:flex;align-items:flex-end;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity 0.25s ease;
+}
+.share-sheet.open{opacity:1;pointer-events:auto;}
+.share-sheet-inner{
+  background:var(--paper);width:100%;max-width:480px;
+  border:var(--line) solid var(--ink);border-bottom:none;
+  border-radius:24px 24px 0 0;padding:22px 26px 34px;
+  transform:translateY(100%);transition:transform 0.3s cubic-bezier(.65,0,.35,1);
+}
+.share-sheet.open .share-sheet-inner{transform:translateY(0);}
+.share-sheet-handle{width:44px;height:5px;background:var(--ink);opacity:0.2;border-radius:10px;margin:0 auto 18px;}
+.share-sheet h3{font-size:1.3rem;text-align:center;margin-bottom:20px;}
+.share-sheet-options{display:flex;gap:18px;justify-content:center;margin-bottom:22px;}
+.share-opt{
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+  background:none;border:none;cursor:pointer;font-family:'JetBrains Mono',monospace;
+  font-size:0.72rem;text-transform:uppercase;color:var(--ink);
+}
+.share-icon{
+  width:58px;height:58px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:1.6rem;border:var(--line) solid var(--ink);background:var(--cream);
+  box-shadow:3px 3px 0 var(--ink);transition:transform 0.15s ease;
+}
+.share-opt:hover .share-icon{transform:translate(-2px,-2px);}
+.share-opt.whatsapp .share-icon{background:#25D366;}
+.share-opt.instagram .share-icon{background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);}
+.share-opt.download .share-icon{background:var(--mustard);}
+
+/* ---- MONTAJE ---- */
+.montaje-box{
+  display:grid;grid-template-columns:1.15fr 0.85fr;gap:40px;
+  max-width:940px;margin:0 auto;align-items:start;
+}
+.montaje-canvas-wrap{
+  position:relative;background:
+    repeating-conic-gradient(var(--paper) 0% 25%, #F0E6CC 0% 50%) 50% / 22px 22px;
+  border:var(--line) solid var(--ink);
+  box-shadow:9px 9px 0 var(--ink);min-height:360px;
+  display:flex;align-items:center;justify-content:center;padding:16px;
+  transform:rotate(-1.2deg);
+}
+.montaje-empty{text-align:center;font-family:'JetBrains Mono',monospace;opacity:0.55;}
+.montaje-empty span{font-size:2.8rem;display:block;margin-bottom:10px;}
+#montaje-canvas{display:none;max-width:100%;touch-action:none;box-shadow:0 0 0 3px var(--ink);}
+.montaje-canvas-wrap.has-photo .montaje-empty{display:none;}
+.montaje-canvas-wrap.has-photo #montaje-canvas{display:block;}
+.montaje-hint{
+  font-family:'JetBrains Mono',monospace;font-size:0.78rem;opacity:0.65;
+  text-align:center;margin-top:14px;padding:0 10px;
+}
+
+.montaje-controls{display:flex;flex-direction:column;gap:24px;}
+.control-block{
+  background:var(--paper);border:var(--line) solid var(--ink);padding:18px 20px;
+  box-shadow:5px 5px 0 var(--ink);transform:rotate(0.6deg);
+}
+.control-block:nth-child(2){transform:rotate(-0.6deg);}
+.control-label{
+  display:block;font-family:'JetBrains Mono',monospace;font-size:0.74rem;
+  text-transform:uppercase;letter-spacing:1px;color:var(--red);font-weight:700;margin-bottom:12px;
+}
+.montaje-stickers{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.sticker-tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;}
+.sticker-tab{
+  font-family:'JetBrains Mono',monospace;font-size:0.68rem;text-transform:uppercase;letter-spacing:0.5px;
+  padding:7px 12px;border:var(--line) solid var(--ink);background:var(--paper);cursor:pointer;
+  box-shadow:2px 2px 0 var(--ink);transition:transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+.sticker-tab::before{content:'★ ';color:var(--red);}
+.sticker-tab:hover{transform:translate(-1px,-1px);box-shadow:3px 3px 0 var(--ink);}
+.sticker-tab.active{background:var(--mustard);transform:translate(-1px,-1px);box-shadow:3px 3px 0 var(--ink);}
+.sticker-panel{display:none;}
+.sticker-panel.active{display:grid;}
+.sticker-pick{
+  background:var(--cream);border:2px solid var(--ink);cursor:pointer;
+  padding:4px 4px 0;transition:transform 0.15s ease, box-shadow 0.15s ease;
+  box-shadow:3px 3px 0 var(--ink);
+}
+.sticker-pick img{width:100%;aspect-ratio:1/1;object-fit:contain;display:block;}
+.sticker-pick:hover{transform:translate(-3px,-3px) rotate(-2deg);box-shadow:5px 5px 0 var(--ink);background:var(--mustard);}
+.sticker-pick:active{transform:translate(0,0);box-shadow:1px 1px 0 var(--ink);}
+
+.frame-options{display:flex;flex-direction:column;gap:10px;}
+.frame-opt{
+  font-family:'JetBrains Mono',monospace;font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;
+  padding:12px 16px;border:2.5px solid var(--ink);background:var(--cream);cursor:pointer;text-align:left;
+  box-shadow:3px 3px 0 var(--ink);transition:transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+.frame-opt:hover{transform:translate(-2px,-2px);box-shadow:5px 5px 0 var(--ink);}
+.frame-opt.active{background:var(--mustard);box-shadow:1px 1px 0 var(--ink);transform:translate(2px,2px);}
+
+.montaje-actions{display:flex;gap:10px;margin-top:10px;}
+.montaje-actions .btn{flex:1;justify-content:center;}
+#montaje-download{transform:rotate(-1deg);}
+#montaje-download:hover{transform:rotate(0deg) translate(2px,2px);}
+#montaje-download[disabled]{transform:none;}
+
+@media (max-width:800px){
+  .montaje-box{grid-template-columns:1fr;}
+  .montaje-canvas-wrap{transform:none;}
+  .control-block, .control-block:nth-child(2){transform:none;}
+  .montaje-stickers{grid-template-columns:repeat(6,1fr);}
+}
+@media (max-width:600px){
+  .quiz-box{padding:32px 5vw;}
+  .result-card img{width:140px;height:140px;}
+}
 
 .about{display:grid;grid-template-columns:1.1fr 0.9fr;gap:60px;align-items:center;}
 .about-photo{position:relative;}
@@ -349,8 +683,14 @@ section{position:relative;padding:100px 6vw;max-width:1360px;margin:0 auto;}
   position:relative;border:var(--line) solid var(--ink);border-radius:18px;overflow:hidden;
   background:var(--ink);aspect-ratio:3/4;display:block;cursor:pointer;
 }
-.member-card img{width:100%;height:100%;object-fit:cover;opacity:0.9;transition:transform 0.4s ease;}
+.member-card img{width:100%;height:100%;object-fit:cover;opacity:0.9;transition:transform 0.4s ease, opacity 0.22s ease;}
 .member-card:hover img{transform:scale(1.06);}
+.member-card img.swap-out{opacity:0;transform:scale(1.12);}
+.member-card-flash{position:absolute;inset:0;background:var(--paper);opacity:0;pointer-events:none;transition:opacity 0.15s ease;}
+.member-card.flash .member-card-flash{opacity:0.85;}
+.member-card.revealing{cursor:wait;}
+.member-card.revealing .member-tag{animation:memberTagPulse 0.55s ease-in-out infinite;}
+@keyframes memberTagPulse{0%,100%{transform:rotate(-2deg) scale(1);}50%{transform:rotate(-2deg) scale(1.1);}}
 .member-tag{
   position:absolute;left:14px;bottom:14px;background:var(--mustard);
   border:2px solid var(--ink);border-radius:30px;padding:8px 16px;
@@ -367,6 +707,29 @@ section{position:relative;padding:100px 6vw;max-width:1360px;margin:0 auto;}
   aspect-ratio:1/1;background:repeating-linear-gradient(45deg,#eee,#eee 10px,#e2e2e2 10px,#e2e2e2 20px);
   display:flex;align-items:center;justify-content:center;
   font-family:'JetBrains Mono',monospace;font-size:0.78rem;text-align:center;color:#8a8a8a;padding:20px;
+  background-size:cover;background-position:center;border:var(--line) solid var(--ink);
+  transition:background-image 0.15s ease;
+}
+.merch-thumb.has-photo{padding:0;color:transparent;overflow:hidden;}
+.merch-thumb.has-photo img{
+  width:100%;height:100%;object-fit:cover;display:block;
+  transition:opacity 0.28s ease, transform 0.28s ease;
+}
+.merch-thumb.has-photo img.swap-out{opacity:0;transform:scale(1.06);}
+.merch-swatches{display:flex;gap:10px;margin-top:10px;}
+.merch-swatches .swatch{
+  width:30px;height:30px;border:var(--line) solid var(--ink);cursor:pointer;padding:0;position:relative;
+  box-shadow:2px 2px 0 var(--ink);transition:transform 0.15s cubic-bezier(.34,1.56,.64,1), box-shadow 0.15s ease;
+}
+.merch-swatches .swatch:hover{transform:translate(-1px,-1px) scale(1.1);box-shadow:3px 3px 0 var(--ink);}
+.merch-swatches .swatch.active{transform:translate(-2px,-2px) scale(1.05);box-shadow:4px 4px 0 var(--ink);}
+.merch-swatches .swatch.active::after{
+  content:'✓';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  color:#fff;font-size:0.9rem;font-weight:900;text-shadow:0 1px 2px rgba(0,0,0,0.5);
+}
+.swatch-name{
+  font-family:'JetBrains Mono',monospace;font-size:0.7rem;text-transform:uppercase;
+  letter-spacing:0.5px;color:var(--ink);opacity:0.6;margin-top:6px;
 }
 .merch-info{padding:14px 2px 0;}
 .merch-info h3{font-size:1.05rem;text-transform:none;font-family:'Space Grotesk';font-weight:700;}
@@ -417,6 +780,69 @@ section{position:relative;padding:100px 6vw;max-width:1360px;margin:0 auto;}
 .follow{background:var(--ink);color:var(--cream);border-radius:26px;text-align:center;padding:70px 6vw;}
 .follow h2{font-size:clamp(2.2rem,6vw,4.2rem);color:var(--paper);}
 .follow-links{display:flex;flex-wrap:wrap;justify-content:center;gap:14px;margin-top:34px;}
+.follow-contact{margin-top:30px;font-family:'Space Grotesk';font-size:0.95rem;opacity:0.85;}
+.follow-contact a{color:var(--mustard);font-weight:700;text-decoration:underline;}
+
+/* ---- detalles decorativos girando en Síguenos (aparecen solo con el glitch bien avanzado) ---- */
+.retro-deco{position:absolute;inset:0;pointer-events:none;overflow:visible;z-index:1;}
+.retro-deco-item{
+  position:absolute;width:60px;opacity:0;
+  filter:drop-shadow(2px 3px 5px rgba(0,0,0,0.45));
+  transition:opacity 0.7s ease;
+}
+body.glitch-high .retro-deco-item{opacity:0.92;animation:retroSpin linear infinite;}
+body.no-motion .retro-deco-item{animation:none !important;}
+@keyframes retroSpin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+.retro-deco-1{top:2%;left:5%;width:52px;animation-duration:11s;}
+.retro-deco-2{top:8%;right:7%;width:60px;animation-duration:9s;animation-direction:reverse;}
+.retro-deco-3{bottom:8%;left:3%;width:96px;animation-duration:17s;}
+.retro-deco-4{bottom:4%;right:5%;width:54px;animation-duration:13s;animation-direction:reverse;}
+.retro-deco-5{top:42%;left:0.5%;width:48px;animation-duration:10s;}
+.retro-deco-6{top:36%;right:1%;width:64px;height:64px;animation-duration:19s;}
+.retro-deco-photo{border-radius:50% !important;object-fit:cover;height:60px;border:3px solid #4fd1ff;box-shadow:0 0 14px rgba(79,209,255,0.65) !important;}
+@media (max-width:760px){
+  .retro-deco-item{width:34px !important;}
+  .retro-deco-photo{height:34px !important;}
+}
+
+/* ---- Síguenos: estilo consola vieja (PS2/PSP) + tubo CRT, en vez de mezcla XP ---- */
+body.glitch-high .follow.retro-console-target{
+  position:relative;overflow:visible;
+  background:#ece9d8 !important;
+  border:2px solid #0831d9 !important;border-radius:8px !important;
+  box-shadow:6px 6px 0 rgba(0,20,120,0.5), inset 0 0 0 1px #fff !important;
+  padding-top:46px !important;
+}
+body.glitch-high .follow.retro-console-target::before{
+  content:'Los_Skeepers.exe — Síguenos';
+  position:absolute;top:0;left:0;right:0;height:26px;z-index:4;
+  background:linear-gradient(180deg,#4198fa 0%,#1a5ce0 15%,#0a3ea8 55%,#001c66 100%);
+  color:#fff;font-family:Tahoma,'Segoe UI',sans-serif;font-size:0.72rem;font-weight:700;
+  display:flex;align-items:center;padding:0 10px;letter-spacing:0.2px;
+  border-radius:6px 6px 0 0;
+}
+body.glitch-high .follow.retro-console-target::after{
+  content:'File  Edit  View  Favorites  Help';position:absolute;top:26px;left:0;right:0;height:20px;z-index:4;
+  display:flex;align-items:center;color:#000;font-family:Tahoma,sans-serif;
+  font-size:0.62rem;letter-spacing:1px;background:#ece9d8;padding:0 10px;
+  border-bottom:1px solid #aca899;
+}
+body.glitch-high .follow.retro-console-target > *{position:relative;z-index:2;}
+body.glitch-high .follow.retro-console-target h2{
+  color:#0a3ea8 !important;text-shadow:none !important;font-family:Tahoma,'Segoe UI',sans-serif !important;
+}
+body.glitch-high .follow.retro-console-target .eyebrow{color:#0a3ea8 !important;}
+body.glitch-high .follow.retro-console-target .follow-links .btn{
+  background:linear-gradient(180deg,#fefefe 0%,#ece9d8 100%) !important;color:#000 !important;
+  border:1px solid #716f64 !important;border-radius:3px !important;
+  box-shadow:inset 1px 1px 0 #fff, 1px 1px 2px rgba(0,0,0,0.25) !important;
+  text-transform:none !important;font-weight:400 !important;transform:none !important;
+  font-family:Tahoma,'Segoe UI',sans-serif !important;
+}
+body.glitch-high .follow.retro-console-target .follow-contact{
+  color:#333 !important;opacity:1 !important;font-family:Tahoma,'Segoe UI',sans-serif !important;
+}
+body.glitch-high .follow.retro-console-target .follow-contact a{color:#0a3ea8 !important;}
 
 footer{
   text-align:center;padding:40px 6vw;font-family:'JetBrains Mono',monospace;
@@ -431,25 +857,151 @@ footer .credit a:hover{opacity:0.8;}
 .member-overlay{
   position:fixed;inset:0;z-index:500;background:var(--cream);
   transform:translateY(100%);transition:transform 0.45s cubic-bezier(.65,0,.35,1);
-  overflow-y:auto;
+  display:flex;
 }
 .member-overlay.open{transform:translateY(0);}
+.member-sidebar{
+  width:150px;flex:none;background:var(--ink);
+  padding:76px 12px 20px;overflow-y:auto;
+  display:flex;flex-direction:column;
+}
+.member-sidebar-links{display:flex;flex-direction:column;gap:6px;}
+.member-scroll{flex:1;overflow-y:auto;height:100%;}
+.member-sidebar-link{
+  display:block;padding:10px 12px;font-family:'JetBrains Mono',monospace;font-size:0.76rem;
+  text-transform:uppercase;letter-spacing:0.5px;color:var(--paper);opacity:0.55;
+  border:1px solid transparent;border-radius:6px;transition:all 0.15s ease;white-space:nowrap;
+}
+.member-sidebar-link:hover{opacity:1;border-color:rgba(255,253,246,0.3);}
+.member-sidebar-link.active{background:var(--mustard);color:var(--ink);opacity:1;font-weight:700;}
+@media (max-width:700px){
+  .member-overlay{flex-direction:column;}
+  .member-sidebar{
+    width:100%;flex-direction:row;overflow-x:auto;overflow-y:visible;
+    padding:68px 10px 10px;
+  }
+  .member-sidebar-links{flex-direction:row;gap:8px;}
+  .member-scroll{flex:1;}
+}
 .member-hero{
-  position:relative;min-height:60vh;display:flex;align-items:flex-end;
+  position:relative;min-height:50vh;display:flex;align-items:flex-end;
   background:var(--ink);overflow:hidden;
 }
 .member-hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0.5;}
 .member-hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(25,21,18,0.1),rgba(25,21,18,0.92));}
 .member-hero-content{position:relative;z-index:2;padding:60px 6vw;color:var(--paper);}
 .member-hero-content h1{font-size:clamp(3rem,10vw,7rem);color:var(--paper);-webkit-text-stroke:2px var(--ink);}
+.member-deco{position:absolute;inset:0;z-index:1;pointer-events:none;overflow:hidden;}
+.member-deco-item{position:absolute;opacity:0.85;filter:drop-shadow(2px 3px 5px rgba(0,0,0,0.5));animation:memberDecoSpin linear infinite;}
+@keyframes memberDecoSpin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+body.no-motion .member-deco-item{animation:none !important;}
+.member-deco-1{top:10%;right:6%;width:56px;animation-duration:10s;}
+.member-deco-2{bottom:8%;right:14%;width:70px;animation-duration:14s;animation-direction:reverse;}
+.member-deco-3{top:14%;left:4%;width:60px;animation-duration:12s;}
+.member-deco-4{bottom:12%;left:10%;width:44px;animation-duration:9s;animation-direction:reverse;}
+@media (max-width:700px){.member-deco-item{width:34px !important;}}
 .member-close{
   position:fixed;top:20px;right:20px;z-index:510;
 }
-.member-body{max-width:760px;margin:0 auto;padding:70px 6vw;}
-.member-body p{font-size:1.1rem;line-height:1.7;}
-.member-playlist{margin-top:30px;border:var(--line) solid var(--ink);border-radius:18px;overflow:hidden;}
+.member-body{
+  max-width:1020px;margin:0 auto;padding:60px 6vw 70px;
+  display:grid;grid-template-columns:1.15fr 0.85fr;gap:48px;align-items:start;
+}
+.member-info{position:relative;}
+.member-info-deco{
+  display:block;width:120px;margin:34px 0 0 auto;opacity:0.92;
+  filter:drop-shadow(2px 4px 6px rgba(0,0,0,0.3));transform:rotate(-4deg);
+}
+.member-info p{font-size:1.1rem;line-height:1.7;}
+.member-lore{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:26px;}
+.member-lore-item{
+  background:var(--paper);border:var(--line) solid var(--ink);padding:14px 16px;
+  box-shadow:4px 4px 0 var(--ink);
+}
+.member-lore-item.wide{grid-column:1 / -1;}
+.member-lore-item .lore-label{
+  display:block;font-family:'JetBrains Mono',monospace;font-size:0.7rem;
+  text-transform:uppercase;letter-spacing:1px;color:var(--red);font-weight:700;margin-bottom:4px;
+}
+.member-lore-item .lore-value{font-family:'Space Grotesk';font-size:0.98rem;line-height:1.4;}
+.member-playlist-wrap{position:relative;}
+.member-playlist{border:var(--line) solid var(--ink);border-radius:18px;overflow:hidden;position:sticky;top:20px;}
 .member-playlist iframe{width:100%;border:none;display:block;}
-.member-nav-strip{display:flex;justify-content:center;gap:10px;padding:0 6vw 60px;flex-wrap:wrap;}
+@media (max-width:800px){
+  .member-body{grid-template-columns:1fr;}
+  .member-lore{grid-template-columns:1fr;}
+  .member-playlist{position:static;}
+  .member-info-deco{width:80px;margin-top:24px;}
+}
+
+/* ---- contenido exclusivo: botón secreto + overlay glitch ---- */
+.secret-cta{display:flex;flex-direction:column;align-items:center;gap:14px;padding:36px 0 6px;}
+.secret-star-btn{
+  background:none;border:none;cursor:pointer;padding:0;line-height:0;
+  transition:transform 0.2s ease;
+}
+.secret-star-btn:hover{transform:scale(1.08);}
+.secret-star-btn:active{transform:scale(0.94);}
+.secret-star-img{
+  width:120px;height:120px;display:block;
+  filter:drop-shadow(4px 4px 0 var(--red));
+  animation:secretStarSpin 6s linear infinite;
+}
+.secret-star-btn:hover .secret-star-img{animation-duration:1.4s;}
+@keyframes secretStarSpin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+.secret-star-caption{
+  font-family:'JetBrains Mono',monospace;font-size:0.82rem;text-align:center;
+  max-width:280px;color:var(--ink);opacity:0.75;
+}
+.secret-star-caption span{display:block;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:0.5px;margin-top:2px;}
+@media (max-width:600px){.secret-star-img{width:92px;height:92px;}}
+
+.secret-overlay{
+  position:fixed;inset:0;z-index:600;background:#000;
+  display:flex;align-items:center;justify-content:center;padding:8vw;
+  opacity:0;pointer-events:none;transition:opacity 0.3s ease;
+}
+.secret-overlay.open{opacity:1;pointer-events:auto;}
+.secret-overlay.glitching{animation:secretGlitchBg 0.65s steps(2,end) both;}
+@keyframes secretGlitchBg{
+  0%{filter:none;transform:none;}
+  10%{filter:invert(1) hue-rotate(90deg);}
+  22%{filter:contrast(3) brightness(0.6);transform:translate(6px,0);}
+  34%{filter:none;transform:translate(-6px,0);}
+  46%{filter:invert(1);transform:translate(4px,-2px);}
+  58%{filter:contrast(2) saturate(0);transform:translate(-4px,2px);}
+  70%{filter:none;transform:translate(3px,0);}
+  82%{filter:hue-rotate(180deg);transform:none;}
+  100%{filter:none;transform:none;}
+}
+.secret-content{max-width:460px;text-align:center;}
+.secret-side-photo{
+  position:absolute;top:50%;width:min(30vw, 380px);
+  filter:contrast(1.1);border:none;
+  transform:translateY(-50%);opacity:0;transition:opacity 0.5s ease 0.15s, transform 0.5s ease 0.15s;
+}
+.secret-side-left{left:1vw;transform:translateY(-50%) translateX(-40px) rotate(-4deg);}
+.secret-side-right{right:1vw;transform:translateY(-50%) translateX(40px) rotate(4deg);}
+.secret-overlay.open .secret-side-photo{opacity:0.85;}
+.secret-overlay.open .secret-side-left{transform:translateY(-50%) translateX(0) rotate(-4deg);}
+.secret-overlay.open .secret-side-right{transform:translateY(-50%) translateX(0) rotate(4deg);}
+@media (max-width:900px){.secret-side-photo{display:none;}}
+.secret-content .eyebrow{color:var(--mustard);}
+.secret-content h2{color:var(--paper);font-size:clamp(1.7rem,5vw,2.8rem);margin-top:10px;-webkit-text-stroke:1px var(--red);}
+.secret-content p{margin-top:16px;color:var(--paper);opacity:0.8;line-height:1.6;}
+.secret-form{margin-top:26px;display:flex;flex-direction:column;gap:12px;}
+.secret-form input[type="email"]{
+  font-family:'JetBrains Mono',monospace;padding:16px 18px;border:var(--line) solid var(--paper);
+  background:transparent;color:var(--paper);font-size:1rem;
+}
+.secret-form input[type="email"]::placeholder{color:rgba(255,253,246,0.5);}
+.secret-form .btn{justify-content:center;}
+.secret-close{position:absolute;top:20px;right:20px;}
+.secret-thanks{display:none;margin-top:24px;color:var(--paper);}
+.secret-thanks.show{display:block;}
+@media (max-width:600px){
+  .secret-content h2{font-size:2rem;}
+}
 
 /* ---- mobile polish pass ---- */
 @media (max-width:600px){
@@ -569,17 +1121,42 @@ footer .credit a:hover{opacity:0.8;}
 <div class="stars-layer"></div>
 <img src="assets/star-yellow.png" class="side-star" id="side-star" alt="">
 
+<!-- GLITCH XP: aparece y se intensifica progresivamente mientras se hace scroll -->
+<div class="glitch-wallpaper" id="glitch-wallpaper">
+  <div class="wallpaper-crew" aria-hidden="true">
+    <img src="assets/char-1.png" class="wallpaper-crew-item" style="left:14%;">
+    <img src="assets/char-2.png" class="wallpaper-crew-item" style="left:26%;">
+    <img src="assets/char-3.png" class="wallpaper-crew-item" style="left:40%;">
+    <img src="assets/char-4.png" class="wallpaper-crew-item" style="left:54%;">
+    <img src="assets/char-5.png" class="wallpaper-crew-item" style="left:67%;">
+    <img src="assets/char-6.png" class="wallpaper-crew-item" style="left:80%;">
+  </div>
+</div>
+<div class="glitch-overlay" id="glitch-overlay">
+  <div class="glitch-scanlines"></div>
+  <div class="glitch-tint"></div>
+  <div class="glitch-rgb"></div>
+  <div class="glitch-text glitch-text-1">FATAL ERROR: DREAMSCAPE.SYS</div>
+  <div class="glitch-text glitch-text-2">A problem has been detected and LOS_SKEEPERS.EXE&#10;has been shut down to prevent damage to your dream.</div>
+  <div class="glitch-text glitch-text-3">0x0000007B INACCESSIBLE_BOOT_DEVICE</div>
+  <div class="glitch-text glitch-text-4">ERROR_CLOUD_SYNC.......... FAILED</div>
+  <div class="glitch-text glitch-text-5">Press F8 to select Advanced Startup Options</div>
+  <div class="glitch-text glitch-text-6">*** STOP: 0x0000000A IRQL_NOT_LESS_OR_EQUAL</div>
+</div>
+
 <nav class="nav">
   <div class="nav-logo"><img src="assets/star-logo.png" alt="Los Skeepers"> LOS SKEEPERS</div>
   <div class="nav-links">
+    <a href="#integrantes">Integrantes</a>
     <a href="#musica">Música</a>
-    <a href="#albumes">Álbumes</a>
     <a href="#shows">Shows</a>
     <a href="#galeria">Galería</a>
     <a href="#fans">Fans</a>
-    <a href="#integrantes">Integrantes</a>
     <a href="#merch">Merch</a>
+    <a href="#videos">Videos</a>
     <a href="#prensa">Prensa</a>
+    <a href="#quiz">¿Qué Skeeper Eres?</a>
+    <a href="#montaje">Móntate</a>
     <a href="#seguir">Síguenos</a>
   </div>
   <button class="nav-toggle" aria-label="Abrir menú">☰</button>
@@ -608,25 +1185,32 @@ footer .credit a:hover{opacity:0.8;}
   </div>
 </div>
 
-<!-- ABOUT -->
-<section id="about" class="about reveal">
-  <img src="assets/char-1.png" class="floating-char char-about" alt="">
-  <div class="about-photo">
-    <img src="assets/group-hero.jpg" alt="Los Skeepers, foto grupal">
-  </div>
-  <div class="about-text">
-    <span class="eyebrow">Quiénes somos</span>
-    <h2>Seis voces,<br>una sola banda.</h2>
-    <p>Los Skeepers nacieron en Guatemala casi por accidente: de ensayos nocturnos entre amigos a shows con la sala llena. Hoy son la primera boy band del país, mezclando pop, indie y actitud de barrio con la energía de un colectivo que crece en cada show.</p>
-    <div class="stat-row">
-      <div class="stat"><b>6</b>integrantes</div>
-      <div class="stat"><b>+20K</b>oyentes mensuales</div>
-      <div class="stat"><b>GT</b>Guatemala</div>
+<section id="integrantes" class="reveal">
+  <img src="assets/char-1.png" class="floating-char char-integrantes" alt="">
+  <div class="about reveal">
+    <div class="about-photo">
+      <img src="assets/group-hero.jpg" alt="Los Skeepers, foto grupal">
+    </div>
+    <div class="about-text">
+      <span class="eyebrow">Quiénes somos</span>
+      <h2>Seis voces,<br>una sola banda.</h2>
+      <p>Los Skeepers nacieron en Guatemala casi por accidente: de ensayos nocturnos entre amigos a shows con la sala llena. Hoy son la primera boy band del país, mezclando pop, indie y actitud de barrio con la energía de un colectivo que crece en cada show.</p>
+      <div class="stat-row">
+        <div class="stat"><b>6</b>integrantes</div>
+        <div class="stat"><b>+20K</b>oyentes mensuales</div>
+        <div class="stat"><b>GT</b>Guatemala</div>
+      </div>
     </div>
   </div>
+
+  <div class="section-head" style="margin-top:70px;">
+    <span class="eyebrow">La banda</span>
+    <h2>Integrantes</h2>
+    <p>Seis personas, seis playlists. Toca a cada uno para conocerlo.</p>
+  </div>
+  <div class="members-grid reveal-stagger" id="members-grid"></div>
 </section>
 
-<!-- MUSICA -->
 <section id="musica" class="reveal">
   <img src="assets/char-2.png" class="floating-char char-musica" alt="">
   <div class="section-head">
@@ -662,66 +1246,6 @@ footer .credit a:hover{opacity:0.8;}
   </div>
 </section>
 
-<!-- ALBUMES / DISCOGRAFIA -->
-<section id="albumes" class="reveal">
-  <div class="section-head">
-    <span class="eyebrow">Discografía</span>
-    <h2>Todas las canciones</h2>
-    <p>Nuestro catálogo completo, sencillo por sencillo.</p>
-  </div>
-  <div class="discog-panel">
-    <a class="discog-row" href="https://open.spotify.com/album/0a2Xcp0g00bOw2jbukDBVY" target="_blank" rel="noopener">
-      <span class="discog-num">01</span>
-      <img class="discog-cover" src="assets/cover-nadamas.jpg" alt="Nada Más +">
-      <span class="discog-title"><b>Nada Más +</b><span>Los Skeepers</span></span>
-      <span class="discog-time">03:02</span>
-    </a>
-    <div class="discog-row">
-      <span class="discog-num">02</span>
-      <img class="discog-cover" src="assets/cover-tuyyo.jpg" alt="tú y yo (y todo lo que falta)">
-      <span class="discog-title"><b>tú y yo (y todo lo que falta)</b><span>Los Skeepers</span></span>
-      <span class="discog-time">--:--</span>
-    </div>
-    <a class="discog-row" href="#shows">
-      <span class="discog-num">03</span>
-      <img class="discog-cover" src="assets/flyer-juanillo.jpg" alt="Juanillo Reguetón">
-      <span class="discog-title"><b>Juanillo Reguetón</b><span>Los Skeepers</span></span>
-      <span class="discog-time">02:54</span>
-    </a>
-    <div class="discog-row">
-      <span class="discog-num">04</span>
-      <img class="discog-cover" src="assets/cover-horaymedia.jpg" alt="Hora y Media">
-      <span class="discog-title"><b>Hora y Media</b><span>Los Skeepers</span></span>
-      <span class="discog-time">--:--</span>
-    </div>
-    <a class="discog-row" href="https://open.spotify.com/track/0AdlQyT3mRtIe33mOwBQEE" target="_blank" rel="noopener">
-      <span class="discog-num">05</span>
-      <img class="discog-cover" src="assets/cover-sitegusta.jpg" alt="Si te gusta?">
-      <span class="discog-title"><b>Si te gusta?</b><span>Fabuloso, Los Skeepers</span></span>
-      <span class="discog-time">02:40</span>
-    </a>
-    <div class="discog-row">
-      <span class="discog-num">06</span>
-      <img class="discog-cover" src="assets/cover-loquduele.jpg" alt="Lo Que Duele">
-      <span class="discog-title"><b>Lo Que Duele</b><span>Los Skeepers</span></span>
-      <span class="discog-time">--:--</span>
-    </div>
-    <div class="discog-row">
-      <span class="discog-num">07</span>
-      <img class="discog-cover" src="assets/cover-siempre.jpg" alt="SIEMPRE">
-      <span class="discog-title"><b>SIEMPRE</b><span>Los Skeepers</span></span>
-      <span class="discog-time">--:--</span>
-    </div>
-    <div class="discog-row">
-      <span class="discog-num">08</span>
-      <img class="discog-cover" src="assets/cover-luismigirl.jpg" alt="Luismigirl">
-      <span class="discog-title"><b>Luismigirl</b><span>Los Skeepers</span></span>
-      <span class="discog-time">--:--</span>
-    </div>
-  </div>
-</section>
-
-<!-- SHOWS -->
 <section id="shows" class="reveal">
   <img src="assets/char-3.png" class="floating-char char-shows" alt="">
   <div class="section-head">
@@ -729,9 +1253,55 @@ footer .credit a:hover{opacity:0.8;}
     <h2>Festivales &amp; Shows</h2>
     <p>Donde nos han visto tocar.</p>
   </div>
+
+  <div class="shows-subhead">
+    <span class="eyebrow">Próximos</span>
+    <h3>Shows futuros</h3>
+  </div>
   <div class="shows-grid reveal-stagger">
     <div class="show-card">
-      <div class="ig-card">
+      <div class="ig-card xp-glitch-target">
+        <div class="ig-card-head">
+          <div class="ig-avatar" style="background:var(--red);">C</div>
+          <div class="ig-card-uname"><b>cameodrive</b><span>Guatemala, GT</span></div>
+          <a class="ig-follow-btn" href="https://www.instagram.com/cameodrive/" target="_blank" rel="noopener">Ver perfil</a>
+        </div>
+        <img class="ig-card-photo" src="assets/ig-photo-cameodrive.jpg" alt="Cameo Dr. & Friends">
+        <div class="ig-card-icons">♡ 💬 ➤ <span class="push">🔖</span></div>
+        <div class="ig-card-likes">Le gusta a los.skeepers y más</div>
+        <div class="ig-card-caption"><b>cameodrive</b>El line-up más caliente de la ciudad — celebrando nuestros XI años junto a las mejores propuestas del Valle, 16 de noviembre en El Ataque</div>
+        <div class="ig-card-comments">Ver comentarios</div>
+        <div class="ig-card-addcomment">◯ Añade un comentario...</div>
+      </div>
+      <div class="show-meta">
+        <span class="eyebrow">Próximo · 16 noviembre</span>
+        <h3>Cameo Dr. &amp; Friends</h3>
+        <p>El Ataque — XI años de Cameo Drive</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- COUNTDOWN (junto al próximo show) -->
+  <div class="countdown-band reveal" style="margin:50px -6vw 0;">
+    <div class="countdown-label">
+      <span class="eyebrow">Próximo show</span>
+      <h3>Cameo Dr. &amp; Friends ★ El Ataque</h3>
+    </div>
+    <div class="countdown-units" id="countdown">
+      <div class="countdown-unit"><b id="cd-days">00</b><span>días</span></div>
+      <div class="countdown-unit"><b id="cd-hours">00</b><span>horas</span></div>
+      <div class="countdown-unit"><b id="cd-mins">00</b><span>min</span></div>
+      <div class="countdown-unit"><b id="cd-secs">00</b><span>seg</span></div>
+    </div>
+  </div>
+
+  <div class="shows-subhead" style="margin-top:60px;">
+    <span class="eyebrow">Ya pasaron</span>
+    <h3>Shows pasados</h3>
+  </div>
+  <div class="shows-grid reveal-stagger">
+    <div class="show-card">
+      <div class="ig-card xp-glitch-target">
         <div class="ig-card-head">
           <div class="ig-avatar" style="background:var(--forest);">F</div>
           <div class="ig-card-uname"><b>festivalbarrilete</b><span>Guatemala, GT</span></div>
@@ -745,13 +1315,13 @@ footer .credit a:hover{opacity:0.8;}
         <div class="ig-card-addcomment">◯ Añade un comentario...</div>
       </div>
       <div class="show-meta">
-        <span class="eyebrow">Próximo · 1 agosto</span>
+        <span class="eyebrow">1 agosto</span>
         <h3>Festival Barrilete '26</h3>
         <p>La Guarida, Zona 4 — Road to Barrilete Vol. 1</p>
       </div>
     </div>
     <div class="show-card">
-      <div class="ig-card">
+      <div class="ig-card xp-glitch-target">
         <div class="ig-card-head">
           <div class="ig-avatar" style="background:var(--mustard);color:var(--ink);">L</div>
           <div class="ig-card-uname"><b>los.skeepers</b><span>Guatemala, GT</span></div>
@@ -770,44 +1340,9 @@ footer .credit a:hover{opacity:0.8;}
         <p>La Popular, 4 Grados Norte</p>
       </div>
     </div>
-    <div class="show-card">
-      <div class="ig-card">
-        <div class="ig-card-head">
-          <div class="ig-avatar" style="background:var(--red);">C</div>
-          <div class="ig-card-uname"><b>cameodrive</b><span>Guatemala, GT</span></div>
-          <a class="ig-follow-btn" href="https://www.instagram.com/cameodrive/" target="_blank" rel="noopener">Ver perfil</a>
-        </div>
-        <img class="ig-card-photo" src="assets/ig-photo-cameodrive.jpg" alt="Cameo Dr. & Friends 2025">
-        <div class="ig-card-icons">♡ 💬 ➤ <span class="push">🔖</span></div>
-        <div class="ig-card-likes">Le gusta a los.skeepers y más</div>
-        <div class="ig-card-caption"><b>cameodrive</b>El line-up más caliente de la ciudad — celebrando nuestros XI años junto a las mejores propuestas del Valle, 16 de noviembre en El Ataque</div>
-        <div class="ig-card-comments">Ver comentarios</div>
-        <div class="ig-card-addcomment">◯ Añade un comentario...</div>
-      </div>
-      <div class="show-meta">
-        <span class="eyebrow">16 noviembre</span>
-        <h3>Cameo Dr. &amp; Friends 2025</h3>
-        <p>El Ataque — XI años de Cameo Drive</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- COUNTDOWN (junto al festival) -->
-  <div class="countdown-band reveal" style="margin:50px -6vw 0;">
-    <div class="countdown-label">
-      <span class="eyebrow">Próximo show</span>
-      <h3>Festival Barrilete '26 ★ La Guarida, Z4</h3>
-    </div>
-    <div class="countdown-units" id="countdown">
-      <div class="countdown-unit"><b id="cd-days">00</b><span>días</span></div>
-      <div class="countdown-unit"><b id="cd-hours">00</b><span>horas</span></div>
-      <div class="countdown-unit"><b id="cd-mins">00</b><span>min</span></div>
-      <div class="countdown-unit"><b id="cd-secs">00</b><span>seg</span></div>
-    </div>
   </div>
 </section>
 
-<!-- GALERIA -->
 <section id="galeria" class="reveal">
   <div class="section-head">
     <span class="eyebrow">En vivo</span>
@@ -831,10 +1366,12 @@ footer .credit a:hover{opacity:0.8;}
     <div class="glitch-tile glitch-video"><video muted loop playsinline preload="none" poster="assets/gallery/gallery-poster-08.jpg" data-src="assets/gallery/gallery-vid-08.mp4"><source data-src="assets/gallery/gallery-vid-08.mp4" type="video/mp4"></video><span>clip 08</span></div>
     <div class="glitch-tile glitch-video"><video muted loop playsinline preload="none" poster="assets/gallery/gallery-poster-09.jpg" data-src="assets/gallery/gallery-vid-09.mp4"><source data-src="assets/gallery/gallery-vid-09.mp4" type="video/mp4"></video><span>clip 09</span></div>
     <div class="glitch-tile glitch-video"><video muted loop playsinline preload="none" poster="assets/gallery/gallery-poster-10.jpg" data-src="assets/gallery/gallery-vid-10.mp4"><source data-src="assets/gallery/gallery-vid-10.mp4" type="video/mp4"></video><span>clip 10</span></div>
+    <div class="glitch-tile" style="background-image:url('assets/collage-art.jpg')"><span>detrás de cámaras</span></div>
+    <div class="glitch-tile" style="background-image:url('assets/bts-1.jpg')"><span>en el estudio</span></div>
+    <div class="glitch-tile" style="background-image:url('assets/bts-2.jpg')"><span>grabando</span></div>
   </div>
 </section>
 
-<!-- MURO DE FANS -->
 <section id="fans" class="reveal">
   <img src="assets/char-4.png" class="floating-char char-fans" alt="">
   <div class="section-head">
@@ -853,22 +1390,13 @@ footer .credit a:hover{opacity:0.8;}
     <div class="fan-tile"><img src="assets/crowd-1.jpg" alt="Fans de Los Skeepers"></div>
   </div>
 </section>
-<section id="integrantes" class="reveal">
-  <div class="section-head">
-    <span class="eyebrow">La banda</span>
-    <h2>Integrantes</h2>
-    <p>Seis personas, seis playlists. Toca a cada uno para conocerlo.</p>
-  </div>
-  <div class="members-grid reveal-stagger" id="members-grid"></div>
-</section>
 
-<!-- MERCH -->
 <section id="merch" class="reveal">
   <img src="assets/char-5.png" class="floating-char char-merch" alt="">
   <div class="section-head">
     <span class="eyebrow">Tienda</span>
     <h2>Merch</h2>
-    <p>Ropa y accesorios oficiales. Escríbenos por Instagram para comprar — fotos de producto muy pronto.</p>
+    <p>Ropa y accesorios oficiales. Escríbenos por Instagram para comprar.</p>
   </div>
   <div class="merch-ticker">
     <div class="marquee-track">
@@ -877,56 +1405,33 @@ footer .credit a:hover{opacity:0.8;}
     </div>
   </div>
   <div class="merch-grid reveal-stagger">
-    <div class="merch-card">
-      <div class="merch-thumb">Foto próximamente</div>
-      <div class="merch-info"><h3>Playera Star Tee</h3><p class="price">Q--</p></div>
+    <div class="merch-card xp-glitch-target" id="startee-card">
+      <div class="merch-thumb has-photo" id="startee-thumb">
+        <img id="startee-thumb-img" src="assets/merch-star-azul.jpg" alt="Playera Star Tee">
+      </div>
+      <div class="merch-info">
+        <h3>Playera Star Tee</h3>
+        <div class="merch-swatches" id="startee-swatches">
+          <button class="swatch active" style="background:#3E6E8E" data-img="assets/merch-star-azul.jpg" data-name="Azul" aria-label="Azul"></button>
+          <button class="swatch" style="background:#2B4C3F" data-img="assets/merch-star-verde.jpg" data-name="Verde" aria-label="Verde"></button>
+          <button class="swatch" style="background:#C50300" data-img="assets/merch-star-roja.jpg" data-name="Roja" aria-label="Roja"></button>
+          <button class="swatch" style="background:#1B2A4A" data-img="assets/merch-star-marino.jpg" data-name="Marino" aria-label="Marino"></button>
+        </div>
+        <p class="swatch-name" id="startee-swatch-name">Azul</p>
+        <p class="price">Q--</p>
+      </div>
     </div>
-    <div class="merch-card">
-      <div class="merch-thumb">Foto próximamente</div>
-      <div class="merch-info"><h3>Gorra Los Skeepers</h3><p class="price">Q--</p></div>
+    <div class="merch-card xp-glitch-target">
+      <div class="merch-thumb has-photo" style="background-image:url('assets/merch-arte-blanca.jpg')"></div>
+      <div class="merch-info"><h3>Playera Arte de la Banda</h3><p class="price">Q--</p></div>
     </div>
-    <div class="merch-card">
+    <div class="merch-card xp-glitch-target">
       <div class="merch-thumb">Foto próximamente</div>
       <div class="merch-info"><h3>Hoodie Skeeper-Lotería</h3><p class="price">Q--</p></div>
     </div>
   </div>
-  <div style="text-align:center;margin-top:36px;">
-    <a class="btn red" href="https://www.instagram.com/direct/t/17843460963523691/" target="_blank" rel="noopener">Pedir por Instagram →</a>
-  </div>
 </section>
 
-<!-- PRENSA -->
-<section id="prensa" class="reveal">
-  <img src="assets/char-6.png" class="floating-char char-prensa" alt="">
-  <div class="section-head">
-    <span class="eyebrow">Nos mencionaron</span>
-    <h2>Prensa</h2>
-  </div>
-  <div class="press-grid">
-    <div class="press-card">
-      <div class="press-photo"><img src="assets/press-dca.jpg" alt="Los Skeepers en vivo"></div>
-      <div class="press-card-body">
-        <div class="press-source"><span class="dot"></span>Diario de Centro América</div>
-        <h3>Los Skeepers y el valor de probar</h3>
-        <p>Un perfil sobre cómo la banda pasó de ensayos nocturnos improvisados a construir una audiencia real: ya suman cinco canciones publicadas y cerca de 20 mil oyentes mensuales.</p>
-        <p class="press-meta">Isa Enríquez · 20 enero, 2026</p>
-        <a class="btn small alt" href="https://dca.gob.gt/noticias-guatemala-diario-centro-america/los-skeepers-y-el-valor-de-probar/" target="_blank" rel="noopener">Leer nota completa →</a>
-      </div>
-    </div>
-    <div class="press-card">
-      <div class="press-photo"><img src="assets/press-npr.jpg" alt="Fabuloso"></div>
-      <div class="press-card-body">
-        <div class="press-source"><span class="dot"></span>NPR Music — Alt.Latino</div>
-        <h3>Salsa, bossa nova y lo nuevo de Argentina</h3>
-        <p>NPR Music incluyó "Si Te Gusta", junto a Fabuloso, en su repaso de las voces más interesantes de la música latina actual — al lado de nombres como Nathy Peluso y Mon Laferte.</p>
-        <p class="press-meta">Felix Contreras &amp; Anamaria Sayre · 29 octubre, 2025</p>
-        <a class="btn small alt" href="https://www.npr.org/2025/10/29/nx-s1-5589243/salsa-bossa-nova-and-argentinas-next-big-thing" target="_blank" rel="noopener">Leer nota completa →</a>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- VIDEOS -->
 <section id="videos" class="reveal">
   <div class="section-head">
     <span class="eyebrow">Míranos</span>
@@ -943,23 +1448,148 @@ footer .credit a:hover{opacity:0.8;}
   </div>
 </section>
 
-<!-- DETRAS DE CAMARAS / CREATIVO -->
-<section id="detras" class="reveal">
-  <div class="section-head">
-    <span class="eyebrow">Zona libre</span>
-    <h2>Detrás de cámaras</h2>
-    <p>El scrapbook oficial. Sin reglas.</p>
+<section id="exclusivo" class="reveal">
+  <img src="assets/char-2.png" class="floating-char char-exclusivo" alt="">
+  <div class="section-head" style="text-align:center;max-width:none;margin-left:auto;margin-right:auto;">
+    <span class="eyebrow">Solo para fans</span>
+    <h2>Contenido Exclusivo</h2>
+    <p style="margin-left:auto;margin-right:auto;max-width:520px;">Algo que no está en ningún otro lado.</p>
   </div>
-  <img src="assets/collage-art.jpg" alt="Collage creativo Los Skeepers" style="border:var(--line) solid var(--ink);transform:rotate(-1deg);">
-  <div class="fans-grid" style="grid-template-columns:repeat(2,1fr);margin-top:22px;">
-    <div class="fan-tile" style="aspect-ratio:4/3;"><img src="assets/bts-1.jpg" alt="En el estudio"></div>
-    <div class="fan-tile" style="aspect-ratio:4/3;"><img src="assets/bts-2.jpg" alt="Grabando en el estudio"></div>
+  <div class="secret-cta">
+    <button class="secret-star-btn" id="secret-open" aria-label="¿Quieres saber un secreto? Presiona la estrella">
+      <img src="assets/star-yellow.png" class="secret-star-img" alt="">
+    </button>
+    <p class="secret-star-caption">¿Quieres saber un secreto? <span>Presiona la estrella</span></p>
   </div>
 </section>
 
-<!-- SEGUIR -->
+<section id="prensa" class="reveal">
+  <img src="assets/sketch-joaquin.png" class="floating-char char-prensa" alt="">
+  <div class="section-head">
+    <span class="eyebrow">Nos mencionaron</span>
+    <h2>Prensa</h2>
+  </div>
+  <div class="press-grid">
+    <div class="press-card xp-glitch-target">
+      <div class="press-photo"><img src="assets/press-dca.jpg" alt="Los Skeepers en vivo"></div>
+      <div class="press-card-body">
+        <div class="press-source"><span class="dot"></span>Diario de Centro América</div>
+        <h3>Los Skeepers y el valor de probar</h3>
+        <p>Un perfil sobre cómo la banda pasó de ensayos nocturnos improvisados a construir una audiencia real: ya suman cinco canciones publicadas y cerca de 20 mil oyentes mensuales.</p>
+        <p class="press-meta">Isa Enríquez · 20 enero, 2026</p>
+        <a class="btn small alt" href="https://dca.gob.gt/noticias-guatemala-diario-centro-america/los-skeepers-y-el-valor-de-probar/" target="_blank" rel="noopener">Leer nota completa →</a>
+      </div>
+    </div>
+    <div class="press-card xp-glitch-target">
+      <div class="press-photo"><img src="assets/press-npr.jpg" alt="Fabuloso"></div>
+      <div class="press-card-body">
+        <div class="press-source"><span class="dot"></span>NPR Music — Alt.Latino</div>
+        <h3>Salsa, bossa nova y lo nuevo de Argentina</h3>
+        <p>NPR Music incluyó "Si Te Gusta", junto a Fabuloso, en su repaso de las voces más interesantes de la música latina actual — al lado de nombres como Nathy Peluso y Mon Laferte.</p>
+        <p class="press-meta">Felix Contreras &amp; Anamaria Sayre · 29 octubre, 2025</p>
+        <a class="btn small alt" href="https://www.npr.org/2025/10/29/nx-s1-5589243/salsa-bossa-nova-and-argentinas-next-big-thing" target="_blank" rel="noopener">Leer nota completa →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="quiz" class="reveal">
+  <img src="assets/sketch-shipi.png" class="floating-char char-quiz" alt="">
+  <div class="section-head">
+    <span class="eyebrow">Descúbrelo</span>
+    <h2>¿Qué Skeeper Eres?</h2>
+    <p>Responde estas preguntas y te decimos con cuál de los seis te pareces más.</p>
+  </div>
+
+  <div class="quiz-box xp-glitch-target" id="quiz-box">
+    <!-- intro -->
+    <div class="quiz-panel" id="quiz-intro">
+      <p class="quiz-intro-text">6 preguntas. Cero ciencia. Toca empezar y descubre cuál de nosotros llevas dentro.</p>
+      <button class="btn red" id="quiz-start">Empezar quiz →</button>
+    </div>
+
+    <!-- question flow -->
+    <div class="quiz-panel" id="quiz-flow" style="display:none;">
+      <div class="quiz-progress"><div class="quiz-progress-bar" id="quiz-progress-bar"></div></div>
+      <div class="quiz-step-label" id="quiz-step-label">Pregunta 1 de 6</div>
+      <h3 class="quiz-question" id="quiz-question"></h3>
+      <div class="quiz-options" id="quiz-options"></div>
+    </div>
+
+    <!-- result -->
+    <div class="quiz-panel" id="quiz-result" style="display:none;">
+      <div class="result-card" id="result-card">
+        <span class="eyebrow">Eres...</span>
+        <img id="result-img" src="" alt="">
+        <h2 id="result-name"></h2>
+        <div class="result-match" id="result-match"></div>
+        <p id="result-fact"></p>
+      </div>
+      <div class="result-actions">
+        <button class="btn" id="result-share">Compartir resultado ↗</button>
+        <button class="btn alt" id="result-retry">Volver a intentar</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MONTAJE DE FOTOS -->
+<section id="montaje" class="reveal">
+  <img src="assets/sketch-alex.png" class="floating-char char-montaje" alt="">
+  <div class="section-head">
+    <span class="eyebrow">Hazlo tuyo</span>
+    <h2>Móntate con Los Skeepers</h2>
+    <p>Sube tu foto, pégales encima, ponle marco y descárgala.</p>
+  </div>
+
+  <div class="montaje-box xp-glitch-target">
+    <div>
+      <div class="montaje-canvas-wrap" id="montaje-canvas-wrap">
+        <div class="montaje-empty" id="montaje-empty">
+          <span>📷</span>
+          <p>Sube una foto para empezar</p>
+        </div>
+        <canvas id="montaje-canvas"></canvas>
+      </div>
+      <p class="montaje-hint">Toca un Skeeper para agregarlo, arrástralo, y usa la esquina para agrandarlo o rotarlo ✌</p>
+
+      <input type="file" id="montaje-upload" accept="image/*" hidden>
+      <button class="btn" id="montaje-upload-btn" style="width:100%;justify-content:center;margin-top:16px;">Subir tu foto →</button>
+      <div class="montaje-actions">
+        <button class="btn small alt" id="montaje-delete">✕ Quitar seleccionado</button>
+        <button class="btn small alt" id="montaje-reset">↺ Reiniciar</button>
+      </div>
+      <button class="btn red" id="montaje-download" style="width:100%;justify-content:center;margin-top:10px;" disabled>Descargar tu montaje ↓</button>
+    </div>
+
+    <div class="montaje-controls">
+      <div class="control-block">
+        <span class="control-label">Agregar Skeeper</span>
+        <div class="sticker-categories" id="sticker-categories"></div>
+      </div>
+
+      <div class="control-block">
+        <span class="control-label">Marco</span>
+        <div class="frame-options" id="montaje-frame-options">
+          <button class="frame-opt active" data-frame="none">Sin marco</button>
+          <button class="frame-opt" data-frame="star">Estrella</button>
+          <button class="frame-opt" data-frame="polaroid">Polaroid</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section id="seguir" class="reveal">
-  <div class="follow">
+  <div class="retro-deco" aria-hidden="true">
+    <img src="assets/char-2.png" class="retro-deco-item retro-deco-1" alt="">
+    <img src="assets/star-yellow.png" class="retro-deco-item retro-deco-2" alt="">
+    <img src="assets/logo-skeepers-red.png" class="retro-deco-item retro-deco-3" alt="">
+    <img src="assets/char-5.png" class="retro-deco-item retro-deco-4" alt="">
+    <img src="assets/frame-star-art.png" class="retro-deco-item retro-deco-5" alt="">
+    <img src="assets/member-shipi-1.jpg" class="retro-deco-item retro-deco-6 retro-deco-photo" alt="">
+  </div>
+  <div class="follow retro-console-target">
     <span class="eyebrow" style="color:var(--mustard);">No te pierdas nada</span>
     <h2>Síguenos</h2>
     <div class="follow-links">
@@ -968,8 +1598,11 @@ footer .credit a:hover{opacity:0.8;}
       <a class="btn red" href="https://www.youtube.com/channel/UC4iGkgYty-UUlRz9sGtw4Gg" target="_blank" rel="noopener">YouTube</a>
       <a class="btn outline" href="https://open.spotify.com/artist/3q9JMhPqxoWXTqoYfJs2RP" target="_blank" rel="noopener">Spotify</a>
     </div>
+    <p class="follow-contact">¿Management, prensa o colaboraciones? <a href="mailto:losskeepers.mgmt@gmail.com">Contáctanos →</a></p>
   </div>
 </section>
+
+
 
 <footer>
   <img src="assets/star-logo.png" alt="">
@@ -983,22 +1616,74 @@ footer .credit a:hover{opacity:0.8;}
 <!-- MEMBER OVERLAY (funciona como "otra página" sin salir del archivo) -->
 <div class="member-overlay" id="member-overlay">
   <a class="btn small alt member-close" id="member-close">✕ Cerrar</a>
-  <header class="member-hero">
-    <img src="assets/group-hero.jpg" alt="">
-    <div class="member-hero-content">
-      <span class="eyebrow" id="m-eyebrow">Integrante · Los Skeepers</span>
-      <h1 id="m-name">—</h1>
-    </div>
-  </header>
-  <div class="member-body">
-    <p id="m-bio">Cargando...</p>
-    <div class="member-playlist">
-      <iframe id="m-playlist" height="352" allowfullscreen loading="lazy" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>
+  <div class="member-sidebar">
+    <div class="member-sidebar-links" id="m-nav"></div>
+  </div>
+  <div class="member-scroll">
+    <header class="member-hero">
+      <img src="assets/group-hero.jpg" alt="">
+      <div class="member-deco" aria-hidden="true">
+        <img src="assets/star-yellow.png" class="member-deco-item member-deco-1" alt="">
+        <img src="assets/logo-skeepers-red.png" class="member-deco-item member-deco-2" alt="">
+        <img src="assets/frame-star-art.png" class="member-deco-item member-deco-3" alt="">
+        <img src="assets/star-sketch-outline.png" class="member-deco-item member-deco-4" alt="">
+      </div>
+      <div class="member-hero-content">
+        <span class="eyebrow" id="m-eyebrow">Integrante · Los Skeepers</span>
+        <h1 id="m-name">—</h1>
+      </div>
+    </header>
+    <div class="member-body">
+      <div class="member-info">
+        <p id="m-bio">Cargando...</p>
+        <div class="member-lore" id="m-lore"></div>
+        <img id="m-icon-sketch" class="member-info-deco" alt="">
+      </div>
+      <div class="member-playlist-wrap">
+        <div class="member-playlist">
+          <iframe id="m-playlist" height="480" allowfullscreen loading="lazy" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>
+        </div>
+      </div>
     </div>
   </div>
-  <div class="member-nav-strip" id="m-nav"></div>
 </div>
 
+<!-- SECRET / CONTENIDO EXCLUSIVO -->
+<div class="secret-overlay" id="secret-overlay">
+  <a class="btn small outline secret-close" id="secret-close">✕ Cerrar</a>
+  <img src="assets/secret-fisheye-left.jpg" class="secret-side-photo secret-side-left" alt="">
+  <img src="assets/secret-fisheye-right.jpg" class="secret-side-photo secret-side-right" alt="">
+  <div class="secret-content">
+    <span class="eyebrow">Shhh</span>
+    <h2>Coloca tu correo electrónico</h2>
+    <p>Así te enviaremos previews de canciones nuevas, información de próximos conciertos, merch y más.</p>
+    <form class="secret-form" id="secret-form">
+      <input type="email" id="secret-email" placeholder="tucorreo@ejemplo.com" required autocomplete="email">
+      <button type="submit" class="btn red">Quiero el secreto →</button>
+    </form>
+    <div class="secret-thanks" id="secret-thanks">
+      <span class="eyebrow">Listo</span>
+      <p>¡Gracias! Ya estás dentro — pronto te llegan las novedades.</p>
+    </div>
+  </div>
+</div>
+
+<!-- SHARE SHEET (resultado del quiz) -->
+<div class="share-sheet" id="share-sheet">
+  <div class="share-sheet-inner">
+    <div class="share-sheet-handle"></div>
+    <h3>Comparte tu resultado</h3>
+    <div class="share-sheet-options">
+      <button class="share-opt whatsapp" id="share-whatsapp"><span class="share-icon">💬</span>WhatsApp</button>
+      <button class="share-opt instagram" id="share-instagram"><span class="share-icon">📸</span>Historia</button>
+      <button class="share-opt download" id="share-download"><span class="share-icon">⬇</span>Descargar</button>
+    </div>
+    <button class="btn small alt" id="share-close" style="width:100%;justify-content:center;">Cerrar</button>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js"></script>
 <script>
 let prefersReducedMotion = false;
 try { prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch(e) {}
@@ -1027,6 +1712,37 @@ if (floatChars.length && !prefersReducedMotion) {
     }, 150);
   }, { passive: true });
 }
+} catch(e) { console.error(e); }
+
+// ---- glitch XP progresivo: se intensifica con la profundidad de scroll de toda la página ----
+try {
+const glitchThresholds = [
+  ['glitch-low', 0.15],
+  ['glitch-mid', 0.40],
+  ['glitch-high', 0.70],
+  ['glitch-max', 0.92]
+];
+if (prefersReducedMotion) document.body.classList.add('no-motion');
+let glitchTicking = false;
+function updateGlitch(){
+  glitchTicking = false;
+  const scrollable = document.documentElement.scrollHeight - window.innerHeight;
+  const p = scrollable > 0 ? Math.min(1, Math.max(0, window.scrollY / scrollable)) : 0;
+  document.documentElement.style.setProperty('--glitch', p.toFixed(3));
+  // el hero se apaga rápido y siempre, a 1.1 alturas de pantalla, sin importar qué tan larga sea la página
+  const heroFade = Math.min(1, window.scrollY / (window.innerHeight * 1.1));
+  document.documentElement.style.setProperty('--hero-fade', heroFade.toFixed(3));
+  glitchThresholds.forEach(([cls, min]) => {
+    document.body.classList.toggle(cls, p >= min);
+  });
+}
+window.addEventListener('scroll', () => {
+  if (!glitchTicking) {
+    glitchTicking = true;
+    requestAnimationFrame(updateGlitch);
+  }
+}, { passive: true });
+updateGlitch();
 } catch(e) { console.error(e); }
 
 // ---- side star spins with scroll ----
@@ -1060,6 +1776,66 @@ const videoIO = new IntersectionObserver((entries) => {
 galleryVideos.forEach(v => videoIO.observe(v));
 } catch(e) { console.error(e); }
 
+// ---- merch: swatches de color para Star Tee (con crossfade) ----
+try {
+const swatchBtns = document.querySelectorAll('#startee-swatches .swatch');
+const starteeImg = document.getElementById('startee-thumb-img');
+const starteeName = document.getElementById('startee-swatch-name');
+let swapLock = false;
+swatchBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    if (btn.classList.contains('active') || swapLock) return;
+    swapLock = true;
+    swatchBtns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    starteeImg.classList.add('swap-out');
+    setTimeout(() => {
+      starteeImg.src = btn.dataset.img;
+      starteeName.textContent = btn.dataset.name || '';
+      starteeImg.classList.remove('swap-out');
+      swapLock = false;
+    }, 220);
+  });
+});
+} catch(e) { console.error(e); }
+
+// ---- secret / contenido exclusivo ----
+try {
+const secretOpenBtn = document.getElementById('secret-open');
+const secretOverlay = document.getElementById('secret-overlay');
+const secretClose = document.getElementById('secret-close');
+const secretForm = document.getElementById('secret-form');
+const secretEmail = document.getElementById('secret-email');
+const secretThanks = document.getElementById('secret-thanks');
+if (secretOpenBtn && secretOverlay) {
+  secretOpenBtn.addEventListener('click', () => {
+    document.body.classList.add('lock');
+    secretOverlay.classList.add('open', 'glitching');
+    setTimeout(() => secretOverlay.classList.remove('glitching'), 650);
+  });
+  const closeSecret = () => {
+    secretOverlay.classList.remove('open');
+    document.body.classList.remove('lock');
+    setTimeout(() => {
+      secretForm.style.display = '';
+      secretThanks.classList.remove('show');
+      secretForm.reset();
+    }, 300);
+  };
+  if (secretClose) secretClose.addEventListener('click', closeSecret);
+  if (secretForm) {
+    secretForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      // TODO: conectar a un servicio real (Mailchimp / Google Form) cuando se decida cuál usar.
+      // Por ahora solo confirma en pantalla — no se envía ni se guarda el correo a ningún lado.
+      if (!secretEmail.value || !secretEmail.checkValidity()) return;
+      secretForm.style.display = 'none';
+      secretThanks.classList.add('show');
+    });
+  }
+}
+} catch(e) { console.error(e); }
+
 // ---- mobile nav toggle ----
 try {
 const navToggle = document.querySelector('.nav-toggle');
@@ -1079,16 +1855,16 @@ const io = new IntersectionObserver((entries) => {
 revealEls.forEach(el => io.observe(el));
 } catch(e) { console.error(e); }
 
-// ---- countdown to Festival Barrilete '26 (1 agosto, 7pm) ----
+// ---- countdown to Cameo Dr. & Friends (16 noviembre, hora por confirmar — 7pm de referencia) ----
 try {
-const showDate = new Date('2026-08-01T19:00:00-06:00').getTime();
+const showDate = new Date('2026-11-16T19:00:00-06:00').getTime();
 function tickCountdown(){
   const now = Date.now();
   const diff = showDate - now;
   const el = document.getElementById('countdown');
   if (!el) return;
   if (diff <= 0){
-    document.querySelector('.countdown-band').innerHTML = '<div class="countdown-label"><span class="eyebrow">Hoy es el show</span><h3>¡Nos vemos en La Guarida! ★</h3></div>';
+    document.querySelector('.countdown-band').innerHTML = '<div class="countdown-label"><span class="eyebrow">Hoy es el show</span><h3>¡Nos vemos en El Ataque! ★</h3></div>';
     return;
   }
   const d = Math.floor(diff / 86400000);
@@ -1135,29 +1911,73 @@ if (starsLayer && !prefersReducedMotion) {
 // ---- members data + grid render ----
 try {
 const MEMBERS = {
-  daniel:   { name: 'Daniel',   playlist: '2yKA9QVuVKaAzPqH6aajf8', bio: 'Su playlist es su tarjeta de presentación: lo que Daniel escucha antes de un show es lo que después escuchas en las canciones de Los Skeepers.' },
-  joaquin:  { name: 'Joaquín',  playlist: '7cobANqWUoRUSkn5IfzWi2', bio: 'Uno de los nombres que aparece una y otra vez en cada flyer de festival: Joaquín es de los que no se pierde un ensayo ni una tocada.' },
-  juanillo: { name: 'Juanillo', playlist: '7wM4w0jJSi7ADwIZTjtSsc', bio: 'El del "Juanillo Reguetón" — su release party llenó La Popular. Su playlist es la mejor pista de por dónde va su próximo sonido.' },
-  jeremy:   { name: 'Jeremy',   playlist: '5sWrzbPofUbVXha6HQ1CUo', bio: 'Parte del núcleo original de Los Skeepers, de los ensayos nocturnos que arrancaron todo esto.' },
-  alex:     { name: 'Alex',     playlist: '6FMAhlFnUw1eSd7cgNeNeq', bio: 'Otro de los seis que sube al escenario cada vez que hay show. Su playlist, directo de sus audífonos a los tuyos.' },
-  chipi:    { name: 'Chipi',    playlist: '2FxuQuEXXCwFMI5vAOapNd', bio: 'Chipi, tal como lo conoce la banda. Su playlist mezcla lo que suena en el cuarto de ensayo con lo que suena camino al show.' }
+  danniel:  { name: 'Danniel',  age: 22, from: 'Los Angeles, California', fact: 'Antes de hacer música quería ser pro player de Call of Duty.', refs: 'Dijon, Justin Bieber, Suei, Merges, Deftones', playlist: '2yKA9QVuVKaAzPqH6aajf8', bio: 'Su playlist es su tarjeta de presentación: lo que Danniel escucha antes de un show es lo que después escuchas en las canciones de Los Skeepers.' },
+  joaquin:  { name: 'Joaquín',  age: 22, from: 'Guatemala, Guatemala', fact: 'Fui youtuber de Minecraft por un tiempo.', refs: 'Mk.gee, Hippo Campus, Rusowsky, Jeff Buckley, Luis Miguel, Geese', playlist: '7cobANqWUoRUSkn5IfzWi2', bio: 'Uno de los nombres que aparece una y otra vez en cada flyer de festival: Joaquín es de los que no se pierde un ensayo ni una tocada.' },
+  juan:     { name: 'Juan',     age: 21, from: 'Guatemala, Guatemala', fact: 'Me gusta demasiado la ketchup.', refs: 'Jane Remover, Modern Baseball, Yung Beef, Akriila, Black Kray, Sam Ray', playlist: '7wM4w0jJSi7ADwIZTjtSsc', bio: 'El del "Juanillo Reguetón" — su release party llenó La Popular. Su playlist es la mejor pista de por dónde va su próximo sonido.' },
+  jeremy:   { name: 'Jeremy',   age: 21, from: 'Amatitlán, Guatemala', fact: 'De pequeño estaba obsesionado con hacer trucos de magia.', refs: 'Paramore, Rusowsky, Alanis Yuki, The Beatles', playlist: '5sWrzbPofUbVXha6HQ1CUo', bio: 'Parte del núcleo original de Los Skeepers, de los ensayos nocturnos que arrancaron todo esto.' },
+  alex:     { name: 'Alex',     age: 23, from: 'Cuautitlán Izcalli, Estado de México', fact: 'Si me ves en mi teléfono, probablemente estoy jugando Dream League Soccer. También tengo perfect pitch.', refs: 'The Strokes, LATIN MAFIA, Primus, Frank Ocean, My Chemical Romance, Yamil Quiere Ser Artista', playlist: '6FMAhlFnUw1eSd7cgNeNeq', bio: 'Otro de los seis que sube al escenario cada vez que hay show. Su playlist, directo de sus audífonos a los tuyos.' },
+  shipi:    { name: 'Shipi',    age: 22, from: 'Guatemala, Guatemala', fact: 'Solía participar en batallas de freestyle que organizaba un amigo cuando estaba en el colegio.', refs: 'Fiona Apple, Underscores, Arca, Alice Phoebe Lou, JPEGMAFIA', playlist: '2FxuQuEXXCwFMI5vAOapNd', bio: 'Shipi, tal como lo conoce la banda. Su playlist mezcla lo que suena en el cuarto de ensayo con lo que suena camino al show.' }
+};
+
+// foto normal + foto "reveal" por integrante — cuando manden las fotos reales, solo se
+// reemplaza el valor aquí, no hay que tocar nada más de la lógica.
+const MEMBER_PHOTOS = {
+  danniel: { photo: 'assets/member-danniel-1.jpg', reveal: 'assets/member-danniel-2.jpg' },
+  joaquin: { photo: 'assets/member-joaquin-1.jpg', reveal: 'assets/member-joaquin-2.jpg' },
+  juan:    { photo: 'assets/member-juan-1.jpg',    reveal: 'assets/member-juan-2.jpg' },
+  jeremy:  { photo: 'assets/member-jeremy-1.jpg',  reveal: 'assets/member-jeremy-2.jpg' },
+  alex:    { photo: 'assets/member-alex-1.jpg',    reveal: 'assets/member-alex-2.jpg' },
+  shipi:   { photo: 'assets/member-shipi-1.jpg',   reveal: 'assets/member-shipi-2.jpg' }
+};
+
+// dibujo a mano + sticker de cuerpo completo por integrante, para decorar el espacio vacío del sidebar
+const MEMBER_ICONS = {
+  danniel: { sketch: 'assets/sketch-danniel.png', char: 'assets/char-1.png' },
+  joaquin: { sketch: 'assets/sketch-joaquin.png', char: 'assets/char-2.png' },
+  juan:    { sketch: 'assets/sketch-juan.png',    char: 'assets/char-3.png' },
+  jeremy:  { sketch: 'assets/sketch-jeremy.png',  char: 'assets/char-4.png' },
+  alex:    { sketch: 'assets/sketch-alex.png',    char: 'assets/char-5.png' },
+  shipi:   { sketch: 'assets/sketch-shipi.png',   char: 'assets/char-6.png' }
 };
 
 const grid = document.getElementById('members-grid');
 Object.entries(MEMBERS).forEach(([slug, m]) => {
+  const photos = MEMBER_PHOTOS[slug] || { photo: 'assets/group-hero.jpg', reveal: 'assets/group-hero.jpg' };
   const card = document.createElement('a');
   card.className = 'member-card';
   card.href = `#${slug}`;
-  card.innerHTML = `<img src="assets/group-hero.jpg" alt="${m.name}"><span class="member-tag">${m.name}</span>`;
-  card.addEventListener('click', (e) => { e.preventDefault(); openMember(slug); });
+  card.innerHTML = `<img src="${photos.photo}" alt="${m.name}"><div class="member-card-flash"></div><span class="member-tag">${m.name}</span>`;
+  card.addEventListener('click', (e) => {
+    e.preventDefault();
+    if (card.classList.contains('revealing')) return;
+    card.classList.add('revealing');
+    const imgEl = card.querySelector('img');
+    imgEl.classList.add('swap-out');
+    setTimeout(() => {
+      imgEl.src = photos.reveal;
+      imgEl.classList.remove('swap-out');
+      card.classList.add('flash');
+      setTimeout(() => card.classList.remove('flash'), 260);
+    }, 220);
+    setTimeout(() => {
+      card.classList.remove('revealing');
+      openMember(slug);
+    }, 2000);
+  });
   grid.appendChild(card);
 });
 
 const overlay = document.getElementById('member-overlay');
 function openMember(slug){
-  const data = MEMBERS[slug] || MEMBERS.daniel;
+  const data = MEMBERS[slug] || MEMBERS.danniel;
   document.getElementById('m-name').textContent = data.name;
   document.getElementById('m-bio').textContent = data.bio;
+  document.getElementById('m-lore').innerHTML = `
+    <div class="member-lore-item"><span class="lore-label">Edad</span><span class="lore-value">${data.age} años</span></div>
+    <div class="member-lore-item"><span class="lore-label">Lugar de nacimiento</span><span class="lore-value">${data.from}</span></div>
+    <div class="member-lore-item wide"><span class="lore-label">Fun fact</span><span class="lore-value">${data.fact}</span></div>
+    <div class="member-lore-item wide"><span class="lore-label">Referencias</span><span class="lore-value">${data.refs}</span></div>
+  `;
   document.getElementById('m-playlist').src = `https://open.spotify.com/embed/playlist/${data.playlist}?utm_source=generator`;
 
   const nav = document.getElementById('m-nav');
@@ -1165,11 +1985,16 @@ function openMember(slug){
   Object.entries(MEMBERS).forEach(([s, m]) => {
     const a = document.createElement('a');
     a.href = '#' + s;
-    a.className = 'btn small ' + (s === slug ? 'dark' : 'alt');
+    a.className = 'member-sidebar-link' + (s === slug ? ' active' : '');
     a.textContent = m.name;
     a.addEventListener('click', (e) => { e.preventDefault(); openMember(s); });
     nav.appendChild(a);
   });
+
+  const icons = MEMBER_ICONS[slug];
+  if (icons) {
+    document.getElementById('m-icon-sketch').src = icons.sketch;
+  }
 
   const wasOpen = overlay.classList.contains('open');
   overlay.classList.add('open');
@@ -1189,6 +2014,454 @@ document.getElementById('member-close').addEventListener('click', closeMember);
 window.addEventListener('DOMContentLoaded', () => {
   const hash = window.location.hash.replace('#', '');
   if (MEMBERS[hash]) openMember(hash);
+});
+
+// ---- QUIZ: QUE SKEEPER ERES ----
+const QUIZ_QUESTIONS = [
+  {
+    q: '¿Cuál es tu canción favorita de Los Skeepers?',
+    type: 'text',
+    options: [
+      { label: 'SIEMPRE', members: ['joaquin','danniel'] },
+      { label: 'NADA MÁS +', members: ['alex','juan'] },
+      { label: 'JUANILLO REGUETÓN', members: ['shipi'] },
+      { label: 'Lo Que Duele', members: ['jeremy'] }
+    ]
+  },
+  {
+    q: '¿Cuál es tu hobby favorito?',
+    type: 'text',
+    options: [
+      { label: 'Salir a pasear al chucho', members: ['joaquin'] },
+      { label: 'Dar clases de Jollybeat y Aura', members: ['alex'] },
+      { label: 'Estudiar cómo la IA anuncia el colapso del capitalismo tardío', members: ['shipi'] },
+      { label: 'Probar hobbies hasta encontrar otro que me guste más+', members: ['danniel'] },
+      { label: 'Aventar globos con agua a los haters', members: ['jeremy'] },
+      { label: 'Hacerme el interesante en letterboxd y dormir', members: ['juan'] }
+    ]
+  },
+  {
+    q: '¿En qué casa vivirías?',
+    type: 'photo',
+    options: [
+      { label: 'Casita en la isla', img: 'assets/quiz/casa-juan.jpg', members: ['juan'] },
+      { label: 'Casa-zapato', img: 'assets/quiz/casa-jeremy.jpg', members: ['jeremy'] },
+      { label: 'Iglú', img: 'assets/quiz/casa-shipi.jpg', members: ['shipi'] },
+      { label: 'Casa clásica', img: 'assets/quiz/casa-danniel.jpg', members: ['danniel'] },
+      { label: 'Casa embrujada', img: 'assets/quiz/casa-joaquin.jpg', members: ['joaquin'] },
+      { label: 'Mansión', img: 'assets/quiz/casa-alex.jpg', members: ['alex'] }
+    ]
+  },
+  {
+    q: '¿Qué corte de cabello te harías?',
+    type: 'photo',
+    options: [
+      { label: 'La flecha', img: 'assets/quiz/pelo-juan.jpg', members: ['juan'] },
+      { label: 'Hello Kitty mohawk', img: 'assets/quiz/pelo-jeremy.jpg', members: ['jeremy'] },
+      { label: 'Piojo Alvarado cut', img: 'assets/quiz/pelo-alex.jpg', members: ['alex'] },
+      { label: 'Claire cut', img: 'assets/quiz/pelo-shipi.jpg', members: ['shipi'] },
+      { label: 'Espinas pelo chikito', img: 'assets/quiz/pelo-danniel.jpg', members: ['danniel'] },
+      { label: 'Bob corto', img: 'assets/quiz/pelo-joaquin.jpg', members: ['joaquin'] }
+    ]
+  },
+  {
+    q: '¿Qué superpoder tendrías?',
+    type: 'text',
+    options: [
+      { label: 'Poder comer brócoli o ser increíble jugando boliche', members: ['joaquin'] },
+      { label: 'Saber exactamente cómo responder cada pregunta para no quedar como idiota', members: ['alex'] },
+      { label: 'Poder explotar una sola vez', members: ['jeremy'] },
+      { label: 'Poder hablar con la boca cerrada MUY fuerte', members: ['danniel'] },
+      { label: 'Hacer feliz a todos mis amigos o dormir extra sin llegar tarde', members: ['juan'] }
+    ]
+  },
+  {
+    q: 'Tu crush te acepta una cita, ¿a dónde le llevarías?',
+    type: 'photo',
+    options: [
+      { label: 'El bowling alley', img: 'assets/quiz/cita-joaquin.jpg', members: ['joaquin'] },
+      { label: 'Perimágico de Perinorte', img: 'assets/quiz/cita-alex.jpg', members: ['alex'] },
+      { label: 'A controlar nuestro chakra', img: 'assets/quiz/cita-danniel.jpg', members: ['danniel'] },
+      { label: 'Un acuario', img: 'assets/quiz/cita-shipi.jpg', members: ['shipi'] },
+      { label: 'Chernóbil', img: 'assets/quiz/cita-jeremy.jpg', members: ['jeremy'] },
+      { label: 'Un viaje por la era mesozoica', img: 'assets/quiz/cita-juan.jpg', members: ['juan'] }
+    ]
+  }
+];
+
+let quizStep = 0;
+let quizScores = {};
+
+const quizIntro = document.getElementById('quiz-intro');
+const quizFlow = document.getElementById('quiz-flow');
+const quizResultPanel = document.getElementById('quiz-result');
+const quizStart = document.getElementById('quiz-start');
+const quizOptionsEl = document.getElementById('quiz-options');
+const quizQuestionEl = document.getElementById('quiz-question');
+const quizStepLabel = document.getElementById('quiz-step-label');
+const quizProgressBar = document.getElementById('quiz-progress-bar');
+
+function startQuiz(){
+  quizStep = 0;
+  quizScores = {};
+  Object.keys(MEMBERS).forEach(k => quizScores[k] = 0);
+  quizIntro.style.display = 'none';
+  quizResultPanel.style.display = 'none';
+  quizFlow.style.display = 'block';
+  renderQuizStep();
+}
+
+function renderQuizStep(){
+  const step = QUIZ_QUESTIONS[quizStep];
+  quizStepLabel.textContent = `Pregunta ${quizStep + 1} de ${QUIZ_QUESTIONS.length}`;
+  quizProgressBar.style.width = `${(quizStep / QUIZ_QUESTIONS.length) * 100}%`;
+  quizQuestionEl.textContent = step.q;
+  quizOptionsEl.innerHTML = '';
+  quizOptionsEl.className = 'quiz-options' + (step.type === 'photo' ? ' photo-options' : '');
+  step.options.forEach(opt => {
+    const btn = document.createElement('div');
+    btn.className = 'quiz-option';
+    btn.innerHTML = step.type === 'photo'
+      ? `<img src="${opt.img}" alt="${opt.label}" loading="lazy"><span>${opt.label}</span>`
+      : `<span>${opt.label}</span>`;
+    btn.addEventListener('click', () => {
+      opt.members.forEach(m => { quizScores[m] = (quizScores[m] || 0) + 1; });
+      quizStep++;
+      if (quizStep < QUIZ_QUESTIONS.length) {
+        renderQuizStep();
+      } else {
+        quizProgressBar.style.width = '100%';
+        setTimeout(showQuizResult, 300);
+      }
+    });
+    quizOptionsEl.appendChild(btn);
+  });
+}
+
+function showQuizResult(){
+  let winner = 'danniel', top = -1;
+  Object.entries(quizScores).forEach(([slug, score]) => {
+    if (score > top) { top = score; winner = slug; }
+  });
+  const totalAnswers = QUIZ_QUESTIONS.length;
+  const pct = Math.round((top / totalAnswers) * 100);
+  const data = MEMBERS[winner];
+
+  document.getElementById('result-img').src = 'assets/group-hero.jpg';
+  document.getElementById('result-img').alt = data.name;
+  document.getElementById('result-name').textContent = data.name;
+  document.getElementById('result-match').textContent = `Eres ${pct}% ${data.name}`;
+  document.getElementById('result-fact').textContent = data.fact;
+
+  quizFlow.style.display = 'none';
+  quizResultPanel.style.display = 'block';
+}
+
+quizStart.addEventListener('click', startQuiz);
+document.getElementById('result-retry').addEventListener('click', startQuiz);
+
+// ---- share sheet ----
+const shareSheet = document.getElementById('share-sheet');
+document.getElementById('result-share').addEventListener('click', () => {
+  shareSheet.classList.add('open');
+});
+document.getElementById('share-close').addEventListener('click', () => {
+  shareSheet.classList.remove('open');
+});
+
+async function getResultBlob(){
+  const card = document.getElementById('result-card');
+  const canvas = await html2canvas(card, { backgroundColor: '#191512', scale: 2 });
+  return new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+}
+
+async function shareResultImage(){
+  try {
+    const blob = await getResultBlob();
+    const file = new File([blob], 'que-skeeper-eres.png', { type: 'image/png' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({ files: [file], title: '¿Qué Skeeper Eres?', text: 'Este es mi resultado del quiz de Los Skeepers' });
+      return true;
+    }
+  } catch(e) { console.error(e); }
+  return false;
+}
+
+document.getElementById('share-whatsapp').addEventListener('click', async () => {
+  const shared = await shareResultImage();
+  if (!shared) {
+    window.open('https://wa.me/?text=' + encodeURIComponent('¿Qué Skeeper eres tú? Hazte el quiz: ' + window.location.href.split('#')[0] + '#quiz'), '_blank');
+  }
+  shareSheet.classList.remove('open');
+});
+
+document.getElementById('share-instagram').addEventListener('click', async () => {
+  const shared = await shareResultImage();
+  if (!shared) {
+    alert('Para compartir a tu historia: descarga la imagen y súbela desde la app de Instagram.');
+  }
+  shareSheet.classList.remove('open');
+});
+
+document.getElementById('share-download').addEventListener('click', async () => {
+  try {
+    const blob = await getResultBlob();
+    const file = new File([blob], 'que-skeeper-eres.png', { type: 'image/png' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({ files: [file], title: '¿Qué Skeeper Eres?', text: 'Este es mi resultado del quiz de Los Skeepers' });
+      shareSheet.classList.remove('open');
+      return;
+    }
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'que-skeeper-eres.png';
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+  } catch(err) {
+    if (!(err && err.name === 'AbortError')) console.error(err);
+  }
+  shareSheet.classList.remove('open');
+});
+} catch(e) { console.error(e); }
+
+// ---- MONTAJE DE FOTOS ----
+try {
+const STICKER_CATEGORIES = [
+  { name: 'Integrantes', items: ['assets/char-1.png','assets/char-2.png','assets/char-3.png','assets/char-4.png','assets/char-5.png','assets/char-6.png'] },
+  { name: 'Skeepers', items: ['assets/skibidi-juan.png','assets/skibidi-joaquin.png','assets/skibidi-danniel.png','assets/skibidi-jeremy.png','assets/skibidi-alex.png','assets/skibidi-shipi.png'] },
+  { name: 'Logo', items: ['assets/logo-skeepers-red.png','assets/logo-skeepers-black.png'] },
+  { name: 'Estrella', items: ['assets/frame-star-art.png','assets/star-sketch-outline.png'] }
+];
+const stickerCategoriesEl = document.getElementById('sticker-categories');
+const tabsEl = document.createElement('div');
+tabsEl.className = 'sticker-tabs';
+const panelsEl = document.createElement('div');
+panelsEl.className = 'sticker-panels';
+stickerCategoriesEl.appendChild(tabsEl);
+stickerCategoriesEl.appendChild(panelsEl);
+
+STICKER_CATEGORIES.forEach((cat, i) => {
+  const panel = document.createElement('div');
+  panel.className = 'sticker-panel montaje-stickers' + (i === 0 ? ' active' : '');
+  cat.items.forEach(src => {
+    const wrap = document.createElement('div');
+    wrap.className = 'sticker-pick';
+    const img = document.createElement('img');
+    img.src = src; img.alt = 'Skeeper sticker'; img.loading = 'lazy';
+    wrap.appendChild(img);
+    wrap.addEventListener('click', () => addSticker(src));
+    panel.appendChild(wrap);
+  });
+  panelsEl.appendChild(panel);
+
+  const tab = document.createElement('button');
+  tab.type = 'button';
+  tab.className = 'sticker-tab' + (i === 0 ? ' active' : '');
+  tab.textContent = cat.name;
+  tab.addEventListener('click', () => {
+    tabsEl.querySelectorAll('.sticker-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    panelsEl.querySelectorAll('.sticker-panel').forEach(p => p.classList.remove('active'));
+    panel.classList.add('active');
+  });
+  tabsEl.appendChild(tab);
+});
+
+const canvasWrap = document.getElementById('montaje-canvas-wrap');
+const downloadBtn = document.getElementById('montaje-download');
+let mCanvas = null;
+let frameObjects = [];
+let currentFrame = 'none';
+
+function initCanvas(w, h){
+  if (mCanvas) { mCanvas.dispose(); }
+  mCanvas = new fabric.Canvas('montaje-canvas', { width: w, height: h, preserveObjectStacking: true });
+  frameObjects = [];
+}
+
+document.getElementById('montaje-upload-btn').addEventListener('click', () => {
+  document.getElementById('montaje-upload').click();
+});
+
+document.getElementById('montaje-upload').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    const dataUrl = ev.target.result;
+    const imgEl = new Image();
+    imgEl.onload = () => {
+      // scale down to a reasonable editing size while keeping the uploaded photo's own aspect ratio
+      const maxDim = 520;
+      const scale = Math.min(maxDim / imgEl.width, maxDim / imgEl.height, 1);
+      const w = Math.round(imgEl.width * scale);
+      const h = Math.round(imgEl.height * scale);
+      initCanvas(w, h);
+      fabric.Image.fromURL(dataUrl, (fImg) => {
+        fImg.set({ left: 0, top: 0, selectable: false, evented: false, isBase: true });
+        fImg.scale(scale);
+        mCanvas.add(fImg);
+        fImg.moveTo(0);
+        canvasWrap.classList.add('has-photo');
+        downloadBtn.disabled = false;
+        currentFrame = 'none';
+        document.querySelectorAll('.frame-opt').forEach(b => b.classList.toggle('active', b.dataset.frame === 'none'));
+      });
+    };
+    imgEl.src = dataUrl;
+  };
+  reader.readAsDataURL(file);
+});
+
+function addSticker(src){
+  if (!mCanvas) return;
+  fabric.Image.fromURL(src, (fImg) => {
+    // stickers anchos (logo, estrella) se escalan por ancho para que no se salgan del canvas;
+    // los cutouts de cuerpo completo se escalan por alto como antes
+    if (fImg.width > fImg.height) {
+      fImg.scaleToWidth(mCanvas.width * 0.45);
+    } else {
+      fImg.scaleToHeight(mCanvas.height * 0.5);
+    }
+    fImg.set({
+      left: mCanvas.width / 2 - (fImg.width * fImg.scaleX) / 2 + (Math.random() * 30 - 15),
+      top: mCanvas.height / 2 - (fImg.height * fImg.scaleY) / 2 + (Math.random() * 30 - 15),
+      cornerColor: '#C50300', cornerStyle: 'circle', transparentCorners: false, borderColor: '#C50300'
+    });
+    mCanvas.add(fImg);
+    mCanvas.setActiveObject(fImg);
+    reapplyFrameOnTop();
+  });
+}
+
+document.getElementById('montaje-delete').addEventListener('click', () => {
+  if (!mCanvas) return;
+  const obj = mCanvas.getActiveObject();
+  if (obj && !obj.isFrame && !obj.isBase) mCanvas.remove(obj);
+});
+
+document.getElementById('montaje-reset').addEventListener('click', () => {
+  if (!mCanvas) return;
+  mCanvas.dispose();
+  mCanvas = null;
+  canvasWrap.classList.remove('has-photo');
+  downloadBtn.disabled = true;
+  document.getElementById('montaje-upload').value = '';
+});
+
+function loadFabricImage(src){
+  return new Promise((resolve) => { fabric.Image.fromURL(src, (img) => resolve(img)); });
+}
+
+async function buildFramePieces(type, w, h){
+  const pieces = [];
+  const mkRect = (l,t,rw,rh,fill) => new fabric.Rect({ left:l, top:t, width:Math.max(0,rw), height:Math.max(0,rh), fill, selectable:false, evented:false, strokeWidth:0 });
+
+  if (type === 'star') {
+    const bw = Math.max(12, Math.round(Math.min(w,h) * 0.05));
+    // four filled bars forming the border — always fully inside canvas bounds, never clipped
+    pieces.push(mkRect(0, 0, w, bw, '#F0B429'));            // top
+    pieces.push(mkRect(0, h - bw, w, bw, '#F0B429'));        // bottom
+    pieces.push(mkRect(0, 0, bw, h, '#F0B429'));             // left
+    pieces.push(mkRect(w - bw, 0, bw, h, '#F0B429'));        // right
+    const starSize = Math.max(26, bw * 1.7);
+    const inset = bw * 0.12;
+    const corners = [
+      [inset, inset],
+      [w - bw - starSize + inset, inset],
+      [inset, h - bw - starSize + inset],
+      [w - bw - starSize + inset, h - bw - starSize + inset]
+    ];
+    for (const [sx, sy] of corners) {
+      const starImg = await loadFabricImage('assets/frame-star-art.png');
+      starImg.set({ left: sx, top: sy, selectable:false, evented:false });
+      starImg.scaleToWidth(starSize);
+      pieces.push(starImg);
+    }
+    const logoImg = await loadFabricImage('assets/logo-skeepers-red.png');
+    const logoH = bw * 0.7;
+    logoImg.scaleToHeight(logoH);
+    logoImg.set({ left: w/2 - (logoImg.width * logoImg.scaleX) / 2, top: h - bw + (bw - logoH) / 2, selectable:false, evented:false });
+    pieces.push(logoImg);
+  } else if (type === 'polaroid') {
+    const bw = Math.max(10, Math.round(Math.min(w,h) * 0.035));
+    const bandH = Math.max(54, h * 0.15);
+    pieces.push(mkRect(0, 0, w, bw, '#191512'));                     // top
+    pieces.push(mkRect(0, 0, bw, h, '#191512'));                     // left
+    pieces.push(mkRect(w - bw, 0, bw, h, '#191512'));                // right
+    pieces.push(mkRect(0, h - bandH, w, bandH, '#FFFDF6'));          // bottom caption band (covers bottom edge too)
+    const logoImg = await loadFabricImage('assets/logo-skeepers-black.png');
+    const logoH = bandH * 0.4;
+    logoImg.scaleToHeight(logoH);
+    logoImg.set({ left: bw + 10, top: h - bandH + (bandH - logoH) / 2, selectable:false, evented:false });
+    pieces.push(logoImg);
+  }
+  pieces.forEach(p => p.isFrame = true);
+  return pieces;
+}
+
+async function applyFrame(type){
+  if (!mCanvas) return;
+  frameObjects.forEach(p => mCanvas.remove(p));
+  frameObjects = [];
+  currentFrame = type;
+  const built = await buildFramePieces(type, mCanvas.width, mCanvas.height);
+  if (currentFrame !== type || !mCanvas) return; // el usuario cambió de marco mientras cargaba — descarta
+  frameObjects = built;
+  frameObjects.forEach(p => { mCanvas.add(p); p.bringToFront(); });
+  mCanvas.requestRenderAll();
+}
+function reapplyFrameOnTop(){
+  if (currentFrame !== 'none') applyFrame(currentFrame);
+}
+
+document.querySelectorAll('.frame-opt').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.frame-opt').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    applyFrame(btn.dataset.frame);
+  });
+});
+
+downloadBtn.addEventListener('click', async () => {
+  if (!mCanvas) return;
+  mCanvas.discardActiveObject();
+  mCanvas.requestRenderAll();
+  const originalLabel = downloadBtn.textContent;
+  downloadBtn.disabled = true;
+  downloadBtn.textContent = 'Preparando...';
+  try {
+    const dataUrl = mCanvas.toDataURL({ format: 'png', multiplier: 2 });
+    // iOS Safari no soporta de forma confiable <a download> con data URLs —
+    // por eso usamos Web Share API como método principal (mismo patrón que el share-sheet del quiz).
+    const res = await fetch(dataUrl);
+    const blob = await res.blob();
+    const file = new File([blob], 'montaje-los-skeepers.png', { type: 'image/png' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({ files: [file], title: 'Los Skeepers', text: 'Mi montaje con Los Skeepers' });
+    } else {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'montaje-los-skeepers.png';
+      document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+    }
+  } catch(err) {
+    if (err && err.name === 'AbortError') {
+      // el usuario cerró el share sheet a propósito — no es un error, no hacemos nada más
+    } else {
+      console.error(err);
+      // último recurso: si algo falla (fetch bloqueado, share no disponible, etc.),
+      // abrimos la imagen en una pestaña nueva para que la guarden con "mantener presionado → Guardar imagen"
+      try {
+        const dataUrl = mCanvas.toDataURL({ format: 'png', multiplier: 2 });
+        window.open(dataUrl, '_blank');
+      } catch(err2) { console.error(err2); }
+    }
+  } finally {
+    downloadBtn.disabled = false;
+    downloadBtn.textContent = originalLabel;
+  }
 });
 } catch(e) { console.error(e); }
 
