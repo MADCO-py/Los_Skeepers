@@ -265,9 +265,8 @@ document.getElementById('result-retry').addEventListener('click', startQuiz);
 // ---- ATRAPA AL SKEEPER: snake clásico, los 6 en fila recogiendo fans, pantalla completa ----
 // escenario arriba (de ahí "salen") + pista de baile subterránea de noche abajo
 try{
-  const CELL = 48; // tamaño estándar, no pantalla completa
-  const STAGE_H = 120; // franja de "escenario" arriba, no jugable
-  const FIXED_COLS = 16, FIXED_ROWS = 9;
+  const CELL = 58; // tamaño estándar +20%
+  const FIXED_COLS = 20, FIXED_ROWS = 12; // se camina en toda la pantalla; +1 fila por quitar la barra de arriba
   const FLOOR_DARK = '#1a1424', FLOOR_DARK2 = '#241b2f';
   const MEMBER_ORDER = ['danniel','joaquin','juan','jeremy','alex','shipi'];
   // descripciones de puro sabor — solo cambian quién va al frente, no afectan el juego en nada más
@@ -281,46 +280,28 @@ try{
   ];
   const MEMBER_COLORS = { danniel:'#C50300', joaquin:'#F0B429', juan:'#2B4C3F', jeremy:'#191512', alex:'#8B5E3C', shipi:'#9C8248' };
   const SKIN_TONE = '#C68958', HAIR_TONE = '#191512', PANTS_TONE = '#191512';
-  const FAN_HAIR_TONES = ['#191512', '#5B4630', '#8B5E3C', '#B23A48'];
   const NEON_COLORS = ['#F0B429', '#C50300', '#2B4C3F', '#8B5E3C'];
-  const START_TICK = 170, MIN_TICK = 95, TICK_STEP = 3;
-  const FAN_WANDER_EVERY = 2, FAN_SPAWN_MS = 5000;
+  const START_TICK = 260, MIN_TICK = 160, TICK_STEP = 2;
+  const FAN_WANDER_EVERY = 3, FAN_SPAWN_MS = 5000;
 
-  const MEMBER_HAS_PHOTOS = { danniel:true, jeremy:true, juan:true, joaquin:true, alex:true, shipi:true };
+  const SHEET_COLS = 4, SHEET_ROWS = 3; // filas: 0=frente 1=lado 2=espalda; columnas = frames de caminata
+  const SHEET_ROW_FOR_VIEW = { front: 0, side: 1, back: 2 };
 
   function loadImg(src){ const img = new Image(); img.src = src; return img; }
 
-  const memberSprites = {};
-  Object.keys(MEMBER_HAS_PHOTOS).forEach(slug => {
-    const front = loadImg('assets/atrapa/' + slug + '-front.png');
-    const side  = loadImg('assets/atrapa/' + slug + '-side.png');
-    const back  = loadImg('assets/atrapa/' + slug + '-back.png');
-    memberSprites[slug] = { front: front, side: side, back: back };
+  // un solo spritesheet por integrante (3 filas: frente/lado/espalda, 4 columnas = ciclo de caminata)
+  const memberSheets = {};
+  MEMBER_ORDER.forEach(slug => {
+    memberSheets[slug] = loadImg('assets/atrapa/' + slug + '-sheet.png');
   });
 
-  // dos apariencias de fan, cada una con su set "caminando" y su set "ya atrapado"
-  // (el que se usa cuando se une atrás de la fila)
-  const FAN_PHOTO_SETS = [
-    {
-      name: 'fan1',
-      front: loadImg('assets/atrapa/fan1-front.png'),
-      back:  loadImg('assets/atrapa/fan1-back.png'),
-      side:  loadImg('assets/atrapa/fan1-side.png'),
-      caughtFront: loadImg('assets/atrapa/fan1-caught-front.png'),
-      caughtSide:  loadImg('assets/atrapa/fan1-caught-side.png'),
-      caughtBack:  loadImg('assets/atrapa/fan1-caught-back.png')
-    },
-    {
-      name: 'fan2',
-      front: loadImg('assets/atrapa/fan2-front.png'),
-      back:  loadImg('assets/atrapa/fan2-back.png'),
-      side:  loadImg('assets/atrapa/fan2-side.png'),
-      caughtFront: loadImg('assets/atrapa/fan2-caught-front.png'),
-      caughtSide:  loadImg('assets/atrapa/fan2-caught-side.png'),
-      caughtBack:  null // no llegó esta vista — usa la de frente de respaldo
-    }
-  ];
-  FAN_PHOTO_SETS.forEach(s => { if (!s.caughtBack) s.caughtBack = s.caughtFront; });
+  // varias apariencias de fan, cada una con su spritesheet "caminando" y su spritesheet
+  // "ya atrapado" (el que se usa cuando se une animado atrás de la fila)
+  const FAN_PHOTO_SETS = ['fan1', 'fan2', 'fan4', 'fan5'].map(name => ({
+    name: name,
+    sheet: loadImg('assets/atrapa/' + name + '-sheet.png'),
+    caughtSheet: loadImg('assets/atrapa/' + name + '-caught-sheet.png')
+  }));
 
   // ---- sprite pixel-art de respaldo 8x10 (por si algún día falta una foto) ----
   const SPRITE_ROWS = [
@@ -373,6 +354,7 @@ try{
 
   let COLS = 20, ROWS = 12, boardTexture = null;
   let snake, segmentIdentities, dir, nextDir, fans, score, tickInterval, loopHandle, running, tickCount, spawnTimer, fanTarget, fanMax;
+  let animFrame = 0; // frame del ciclo de caminata (0-3), avanza en cada paso
   let uiState = 'select'; // 'select' | 'start' | 'playing' | 'over'
   let selectedLeaderIndex = 0; // se mantiene entre partidas de la misma sesión, no se resetea solo
 
@@ -385,61 +367,33 @@ try{
   let muted = safeGetMuted();
 
   // helper: coordenada de grilla -> pixel real (la pista empieza después del escenario)
-  function pxY(gridY){ return STAGE_H + gridY * CELL; }
+  function pxY(gridY){ return gridY * CELL; }
 
   function buildBoard(){
     boardTexture = document.createElement('canvas');
     boardTexture.width = canvas.width; boardTexture.height = canvas.height;
     const octx = boardTexture.getContext('2d');
 
-    // ---- escenario arriba, de noche, estilo 8-bits: cortina + lucecitas + focos escalonados ----
-    const stageGrad = octx.createLinearGradient(0, 0, 0, STAGE_H);
-    stageGrad.addColorStop(0, '#0d0d12');
-    stageGrad.addColorStop(1, '#191512');
-    octx.fillStyle = stageGrad;
-    octx.fillRect(0, 0, canvas.width, STAGE_H);
-
-    // haces de luz escalonados (bloques, no degradado suave) bajando hacia la pista
-    const beamColors = ['#F0B429', '#C50300', '#2B4C3F'];
-    const beamSteps = 7;
-    for (let i = 0; i < 3; i++){
-      const bx = canvas.width * (0.18 + i * 0.32);
-      octx.fillStyle = beamColors[i % beamColors.length];
-      for (let s = 0; s < beamSteps; s++){
-        const t0 = s / beamSteps, t1 = (s + 1) / beamSteps;
-        const y0 = t0 * STAGE_H, y1 = t1 * STAGE_H;
-        const halfW = 16 + (140 - 16) * t0;
-        octx.globalAlpha = 0.16 - t0 * 0.09;
-        octx.fillRect(bx - halfW, y0, halfW * 2, y1 - y0);
-      }
-    }
-    octx.globalAlpha = 1;
-
-    // hilera de lucecitas pixeladas (foquitos tipo guirnalda de concierto)
-    const bulbGap = Math.max(18, CELL * 0.4);
-    let bi = 0;
-    for (let bx = bulbGap / 2; bx < canvas.width; bx += bulbGap){
-      const c = NEON_COLORS[bi % NEON_COLORS.length];
-      octx.fillStyle = c;
-      octx.fillRect(bx - 4, 14, 8, 8);
-      octx.fillStyle = c + '55';
-      octx.fillRect(bx - 7, 11, 14, 14);
-      bi++;
-    }
-
-    // borde/labio del escenario (cinta de peligro, como el marco del campo)
-    for (let x = 0; x < canvas.width; x += 32){
-      octx.fillStyle = (Math.floor(x / 32) % 2 === 0) ? '#191512' : '#F0B429';
-      octx.fillRect(x, STAGE_H - 8, 16, 8);
-    }
-
-    // ---- pista de baile subterránea abajo: piso oscuro con losetas que brillan tipo antro ----
+    // ---- pista de baile subterránea: piso oscuro parejo, se camina en toda la pantalla ----
     for (let y = 0; y < ROWS; y++){
       for (let x = 0; x < COLS; x++){
         octx.fillStyle = (x + y) % 2 === 0 ? FLOOR_DARK : FLOOR_DARK2;
         octx.fillRect(x * CELL, pxY(y), CELL, CELL);
       }
     }
+
+    // hilera de lucecitas pixeladas apenas arriba de todo, de puro adorno (no bloquea nada)
+    const bulbGap = Math.max(18, CELL * 0.4);
+    let bi = 0;
+    for (let bx = bulbGap / 2; bx < canvas.width; bx += bulbGap){
+      const c = NEON_COLORS[bi % NEON_COLORS.length];
+      octx.fillStyle = c;
+      octx.fillRect(bx - 4, 6, 8, 8);
+      octx.fillStyle = c + '55';
+      octx.fillRect(bx - 7, 3, 14, 14);
+      bi++;
+    }
+
     // algunas losetas "encendidas" al azar, como pista de baile iluminada
     for (let y = 0; y < ROWS; y++){
       for (let x = 0; x < COLS; x++){
@@ -464,9 +418,9 @@ try{
     COLS = FIXED_COLS;
     ROWS = FIXED_ROWS;
     canvas.width = COLS * CELL;
-    canvas.height = STAGE_H + ROWS * CELL;
-    fanTarget = Math.min(20, Math.max(6, Math.round((COLS * ROWS) / 40)));
-    fanMax = fanTarget + 4;
+    canvas.height = ROWS * CELL;
+    fanTarget = Math.min(10, Math.max(4, Math.round((COLS * ROWS) / 70)));
+    fanMax = fanTarget + 2;
     buildBoard();
     if (cb) cb();
   }
@@ -517,14 +471,13 @@ try{
   }
   function makeFan(){
     const c = freeCell();
-    c.hair = FAN_HAIR_TONES[Math.floor(Math.random() * FAN_HAIR_TONES.length)];
     c.spriteSet = FAN_PHOTO_SETS[Math.floor(Math.random() * FAN_PHOTO_SETS.length)];
     c.dir = { x: 0, y: 1 };
     return c;
   }
 
   function resetState(){
-    // arrancan arriba de la pista, recién salidos del escenario, caminando hacia abajo
+    // arrancan arriba de toda la pista, caminando hacia abajo
     const startY = 0;
     const startX = Math.floor(COLS / 2);
     snake = [];
@@ -546,12 +499,29 @@ try{
   }
 
   // ---- pantalla de selección de líder ----
+  const selectPortraitCtx = selectPortrait.getContext('2d');
+  function drawSelectPortrait(slug){
+    const sheet = memberSheets[slug];
+    selectPortraitCtx.clearRect(0, 0, selectPortrait.width, selectPortrait.height);
+    if (sheet && sheet.complete && sheet.naturalWidth){
+      const fw = sheet.naturalWidth / SHEET_COLS, fh = sheet.naturalHeight / SHEET_ROWS;
+      const scale = Math.min(selectPortrait.width / fw, selectPortrait.height / fh);
+      const w = fw * scale, h = fh * scale;
+      const dx = (selectPortrait.width - w) / 2, dy = selectPortrait.height - h;
+      selectPortraitCtx.imageSmoothingEnabled = false;
+      selectPortraitCtx.drawImage(sheet, 0, 0, fw, fh, dx, dy, w, h);
+    } else {
+      // el spritesheet puede seguir cargando — reintenta si la selección sigue siendo esta
+      setTimeout(() => {
+        if (SELECT_OPTIONS[selectedLeaderIndex].slug === slug) drawSelectPortrait(slug);
+      }, 150);
+    }
+  }
   function renderSelect(){
     const opt = SELECT_OPTIONS[selectedLeaderIndex];
-    selectPortrait.src = 'assets/atrapa/' + opt.slug + '-front.png';
-    selectPortrait.alt = opt.name;
     selectNameEl.textContent = opt.name.toUpperCase();
     selectDescEl.textContent = opt.desc;
+    drawSelectPortrait(opt.slug);
   }
   function selectMove(delta){
     selectedLeaderIndex = (selectedLeaderIndex + delta + SELECT_OPTIONS.length) % SELECT_OPTIONS.length;
@@ -579,22 +549,24 @@ try{
     return { view: 'side', flip: true };
   }
 
-  function drawCharacterSprite(img, gx, gy, flip, targetH, fallbackColor, fallbackHair){
+  // dibuja un recuadro de un spritesheet (fila según la vista, columna según el frame de animación)
+  function drawSheetSprite(sheet, gx, gy, flip, targetH, view, frame, fallbackColor, fallbackHair){
     const cx = gx * CELL + CELL / 2;
     const groundY = pxY(gy) + CELL;
-    if (img && img.complete && img.naturalWidth){
-      const scale = targetH / img.naturalHeight;
-      const w = img.naturalWidth * scale;
+    if (sheet && sheet.complete && sheet.naturalWidth){
+      const fw = sheet.naturalWidth / SHEET_COLS, fh = sheet.naturalHeight / SHEET_ROWS;
+      const row = SHEET_ROW_FOR_VIEW[view];
+      const sx = (frame % SHEET_COLS) * fw, sy = row * fh;
+      const scale = targetH / fh;
+      const w = fw * scale;
       ctx.save();
       if (flip){ ctx.translate(cx, 0); ctx.scale(-1, 1); ctx.translate(-cx, 0); }
-      ctx.drawImage(img, cx - w / 2, groundY - targetH, w, targetH);
+      ctx.drawImage(sheet, sx, sy, fw, fh, cx - w / 2, groundY - targetH, w, targetH);
       ctx.restore();
     } else {
       drawPixelPerson(gx * CELL + CELL * 0.06, pxY(gy) + CELL * 0.02, CELL * 0.88, fallbackColor, fallbackHair || HAIR_TONE);
     }
   }
-
-  const CAUGHT_VIEW_KEY = { front: 'caughtFront', side: 'caughtSide', back: 'caughtBack' };
 
   function draw(){
     ctx.drawImage(boardTexture, 0, 0);
@@ -609,20 +581,30 @@ try{
       if (e.kind === 'fan'){
         const f = e.data;
         const { view, flip } = pickView(f.dir);
-        drawCharacterSprite(f.spriteSet[view], f.x, f.y, flip, CELL * 1.9, '#FFFDF6', f.hair);
+        drawSheetSprite(f.spriteSet.sheet, f.x, f.y, flip, CELL * 1.9, view, animFrame, '#FFFDF6', HAIR_TONE);
       } else {
         const id = segmentIdentities[e.idx] || segmentIdentities[segmentIdentities.length - 1];
-        const { view, flip } = pickView(dir);
+        // cada puesto de la fila mira hacia donde está el que va justo adelante suyo — así
+        // recién gira cuando llega a la esquina donde giró el de adelante, no todos de golpe
+        const { view, flip } = pickView(segDir(e.idx));
         if (id.kind === 'fan'){
-          const img = id.spriteSet[CAUGHT_VIEW_KEY[view]];
-          drawCharacterSprite(img, e.data.x, e.data.y, flip, CELL * 1.9, '#FFFDF6', HAIR_TONE);
+          drawSheetSprite(id.spriteSet.caughtSheet, e.data.x, e.data.y, flip, CELL * 1.9, view, animFrame, '#FFFDF6', HAIR_TONE);
         } else {
-          const sprites = memberSprites[id.slug];
-          const img = sprites ? sprites[view] : null;
-          drawCharacterSprite(img, e.data.x, e.data.y, flip, CELL * 1.9, MEMBER_COLORS[id.slug], HAIR_TONE);
+          drawSheetSprite(memberSheets[id.slug], e.data.x, e.data.y, flip, CELL * 1.9, view, animFrame, MEMBER_COLORS[id.slug], HAIR_TONE);
         }
       }
     });
+  }
+
+  // dirección "efectiva" de un puesto de la fila: el líder usa la dirección real del juego;
+  // el resto mira hacia dónde está el puesto de adelante (su próximo destino), que es
+  // exactamente donde ese puesto giró — por eso el giro se propaga casilla por casilla
+  function segDir(i){
+    if (i === 0) return dir;
+    const cur = snake[i], ahead = snake[i - 1];
+    const dx = ahead.x - cur.x, dy = ahead.y - cur.y;
+    if (dx === 0 && dy === 0) return dir;
+    return { x: Math.sign(dx), y: Math.sign(dy) };
   }
 
   function queueDir(x, y){
@@ -632,14 +614,18 @@ try{
   }
 
   function wanderFans(){
+    // siempre se mueven (antes se quedaban quietos la mitad de las veces) — el ritmo lento
+    // ahora viene de FAN_WANDER_EVERY (revisa cada varios ticks) y no de quedarse parados
     const opts = [{x:1,y:0},{x:-1,y:0},{x:0,y:1},{x:0,y:-1}];
     fans.forEach(f => {
-      if (Math.random() > 0.5) return;
-      const o = opts[Math.floor(Math.random() * 4)];
-      const nx = f.x + o.x, ny = f.y + o.y;
-      if (nx < 0 || ny < 0 || nx >= COLS || ny >= ROWS) return;
-      if (!cellFree(nx, ny)) return;
-      f.x = nx; f.y = ny; f.dir = o;
+      const order = [...opts].sort(() => Math.random() - 0.5);
+      for (const o of order){
+        const nx = f.x + o.x, ny = f.y + o.y;
+        if (nx < 0 || ny < 0 || nx >= COLS || ny >= ROWS) continue;
+        if (!cellFree(nx, ny)) continue;
+        f.x = nx; f.y = ny; f.dir = o;
+        break;
+      }
     });
   }
 
@@ -685,10 +671,26 @@ try{
     loopHandle = setInterval(tick, tickInterval);
   }
 
+  // el ciclo de caminata anda a su propio ritmo (más fluido), sin importar qué tan lento
+  // se mueva la fila por la pista — así no se ve tiesa aunque el juego vaya despacio
+  const ANIM_MS = 120; // un poco más rápido que antes, se siente menos tieso
+  let animHandle = null;
+  function startAnim(){
+    if (animHandle) clearInterval(animHandle);
+    animHandle = setInterval(() => {
+      animFrame = (animFrame + 1) % SHEET_COLS;
+      if (running) draw();
+    }, ANIM_MS);
+  }
+  function stopAnim(){
+    if (animHandle) { clearInterval(animHandle); animHandle = null; }
+  }
+
   function stopLoop(){
     running = false;
     if (loopHandle) { clearInterval(loopHandle); loopHandle = null; }
     if (spawnTimer) { clearInterval(spawnTimer); spawnTimer = null; }
+    stopAnim();
   }
 
   function startGame(){
@@ -703,6 +705,7 @@ try{
     overScreen.style.display = 'none';
     draw();
     restartInterval();
+    startAnim();
     spawnTimer = setInterval(maybeSpawnFan, FAN_SPAWN_MS);
   }
 
@@ -766,8 +769,13 @@ try{
   });
 
   document.addEventListener('visibilitychange', () => {
-    if (document.hidden && loopHandle){ clearInterval(loopHandle); loopHandle = null; }
-    else if (!document.hidden && running && !loopHandle){ restartInterval(); }
+    if (document.hidden){
+      if (loopHandle){ clearInterval(loopHandle); loopHandle = null; }
+      stopAnim();
+    } else if (running){
+      if (!loopHandle) restartInterval();
+      if (!animHandle) startAnim();
+    }
   });
 
   // se resetea a la pantalla de inicio cada vez que se entra a este juego desde la Sala de Juegos,
