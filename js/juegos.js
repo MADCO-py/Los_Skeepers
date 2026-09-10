@@ -4,8 +4,8 @@ try{
     { slug:'quiz',     name:'¿QUÉ SKEEPER SOS?',      ready:true  },
     { slug:'codigos',  name:'LOS CÓDIGOS SECRETOS',     ready:false },
     { slug:'memorama', name:'MEMORAMA SKEEPER',         ready:false },
-    { slug:'atrapa',   name:'ATRAPA AL SKEEPER',        ready:true  },
-    { slug:'corre',    name:'CORRE Y ESQUIVA',          ready:true  },
+    { slug:'atrapa',   name:'REÚNE MÁS FANS',           ready:true  },
+    { slug:'corre',    name:'HORA Y MEDIA SIN LLEGAR',  ready:true  },
     { slug:'puzzle',   name:'ROMPECABEZAS DESLIZANTE',  ready:false },
     { slug:'trivia',   name:'TRIVIA SKEEPER',           ready:false },
     { slug:'rasca',    name:'RASCA Y GANA',             ready:false },
@@ -419,17 +419,29 @@ try{
   // tamaño fijo — pero se ajusta al alto de la pantalla para que siempre se vea completo,
   // sin necesidad de hacer scroll (el ancho igual respeta el máximo de siempre)
   const wrapEl = document.querySelector('#game-slot-atrapa .atrapa-wrap');
+  const atrapaSidebarEl = document.querySelector('#game-slot-atrapa .atrapa-sidebar');
   function fitWrapToViewport(){
     const bar = document.querySelector('#game-overlay .game-overlay-bar');
     const barH = bar ? bar.offsetHeight : 0;
-    const sidebarAndGaps = 92 + 8 + 16; // ancho de la barra lateral + separaciones + padding del marco
-    const totalW = sidebarAndGaps + COLS * CELL;
-    const totalH = ROWS * CELL;
-    const aspect = totalW / totalH;
     const availH = Math.max(260, window.innerHeight - barH - 36);
     const availW = Math.min(window.innerWidth * 0.92, 1400);
-    const targetW = Math.min(availW, availH * aspect);
-    wrapEl.style.width = Math.floor(targetW) + 'px';
+    const stacked = window.matchMedia('(max-width:700px)').matches;
+    if (stacked){
+      // en celular la barra de puntaje/mute queda ARRIBA del juego, no al lado —
+      // hay que restar su alto real (no el ancho) para que el juego entre completo
+      const sidebarH = atrapaSidebarEl ? atrapaSidebarEl.offsetHeight : 50;
+      const frameAspect = (COLS * CELL) / (ROWS * CELL);
+      const availFrameH = Math.max(160, availH - sidebarH - 8);
+      const targetW = Math.min(availW, availFrameH * frameAspect);
+      wrapEl.style.width = Math.floor(targetW) + 'px';
+    } else {
+      const sidebarAndGaps = 92 + 8 + 16; // ancho de la barra lateral + separaciones + padding del marco
+      const totalW = sidebarAndGaps + COLS * CELL;
+      const totalH = ROWS * CELL;
+      const aspect = totalW / totalH;
+      const targetW = Math.min(availW, availH * aspect);
+      wrapEl.style.width = Math.floor(targetW) + 'px';
+    }
   }
 
   function sizeCanvas(cb){
@@ -752,15 +764,28 @@ try{
   document.getElementById('atrapa-select-portrait-wrap').addEventListener('click', (e) => { e.stopPropagation(); selectMove(1); });
   selectConfirmBtn.addEventListener('click', (e) => { e.stopPropagation(); confirmLeader(); });
 
-  document.querySelectorAll('#atrapa-touch button').forEach(btn => {
+  document.querySelectorAll('#atrapa-touch .dpad button').forEach(btn => {
     btn.addEventListener('click', () => {
       if (!slotEl.classList.contains('active')) return;
-      if (uiState === 'select') return;
+      if (uiState === 'select'){
+        if (btn.dataset.dir === 'left') selectMove(-1);
+        else if (btn.dataset.dir === 'right') selectMove(1);
+        return;
+      }
       const dirMap = { up:{x:0,y:-1}, down:{x:0,y:1}, left:{x:-1,y:0}, right:{x:1,y:0} };
       const d = dirMap[btn.dataset.dir];
       if (!running){ startGame(); return; }
       queueDir(d.x, d.y);
     });
+  });
+  document.querySelector('#atrapa-touch .btn-a').addEventListener('click', () => {
+    if (!slotEl.classList.contains('active')) return;
+    if (uiState === 'select') confirmLeader();
+    else if (!running) startGame();
+  });
+  document.querySelector('#atrapa-touch .btn-b').addEventListener('click', () => {
+    if (!slotEl.classList.contains('active')) return;
+    if (uiState !== 'select' && !running) showSelectScreen();
   });
 
   document.addEventListener('keydown', (e) => {
@@ -988,17 +1013,27 @@ try{
   }
 
   const wrapEl = slotEl.querySelector('.atrapa-wrap');
+  const correSidebarEl = slotEl.querySelector('.atrapa-sidebar');
   function fitWrapToViewport(){
     const bar = document.querySelector('#game-overlay .game-overlay-bar');
     const barH = bar ? bar.offsetHeight : 0;
-    const sidebarAndGaps = 92 + 8 + 16;
-    const totalW = sidebarAndGaps + canvas.width;
-    const totalH = canvas.height;
-    const aspect = totalW / totalH;
     const availH = Math.max(260, window.innerHeight - barH - 36);
     const availW = Math.min(window.innerWidth * 0.92, 1400);
-    const targetW = Math.min(availW, availH * aspect);
-    wrapEl.style.width = Math.floor(targetW) + 'px';
+    const stacked = window.matchMedia('(max-width:700px)').matches;
+    if (stacked){
+      const sidebarH = correSidebarEl ? correSidebarEl.offsetHeight : 50;
+      const frameAspect = canvas.width / canvas.height;
+      const availFrameH = Math.max(160, availH - sidebarH - 8);
+      const targetW = Math.min(availW, availFrameH * frameAspect);
+      wrapEl.style.width = Math.floor(targetW) + 'px';
+    } else {
+      const sidebarAndGaps = 92 + 8 + 16;
+      const totalW = sidebarAndGaps + canvas.width;
+      const totalH = canvas.height;
+      const aspect = totalW / totalH;
+      const targetW = Math.min(availW, availH * aspect);
+      wrapEl.style.width = Math.floor(targetW) + 'px';
+    }
   }
   window.addEventListener('resize', () => { if (slotEl.classList.contains('active')) fitWrapToViewport(); });
 
@@ -1192,12 +1227,13 @@ try{
     const scrollPx = speed * dt;
     bgOffset += scrollPx;
 
-    const moveObs = scrollPx * 1.15;
+    const moveMap = scrollPx;       // objetos de banqueta: pegados al mapa, misma velocidad
+    const moveCar = scrollPx * 1.3; // autos: más rápido que el mapa
     const hitBox = 26;
 
     obstacles = obstacles.filter(o => {
       const prevX = o.x;
-      o.x -= moveObs;
+      o.x -= (o.kind === 'car' ? moveCar : moveMap);
       if (o.x < -120) return false;
       if (invulnMs <= 0 && o.lane === playerLane && prevX >= playerX - hitBox && o.x <= playerX + hitBox){
         loseLife();
@@ -1208,7 +1244,7 @@ try{
 
     rescues = rescues.filter(r => {
       const prevX = r.x;
-      r.x -= moveObs;
+      r.x -= moveMap; // los Skeepers a rescatar caminan a paso de banqueta, no de auto
       if (r.x < -100) return false;
       if (r.lane === playerLane && prevX >= playerX - hitBox && r.x <= playerX + hitBox){
         if (queue.length < 5){
@@ -1323,9 +1359,10 @@ try{
   document.getElementById('corre-change-btn').addEventListener('click', () => { showSelectScreen(); });
   canvasWrap.addEventListener('click', () => { if (uiState === 'start') startGame(); });
 
-  document.querySelectorAll('#corre-touch button').forEach(btn => {
+  document.querySelectorAll('#corre-touch .dpad button').forEach(btn => {
     const dir = btn.dataset.dir;
     btn.addEventListener('mousedown', () => {
+      if (uiState === 'select'){ if (dir === 'left') selectMove(-1); else if (dir === 'right') selectMove(1); return; }
       if (!running) return;
       if (dir === 'right') heldAccel = true;
       else if (dir === 'left') heldBrake = true;
@@ -1334,6 +1371,7 @@ try{
     });
     btn.addEventListener('touchstart', (e) => {
       e.preventDefault();
+      if (uiState === 'select'){ if (dir === 'left') selectMove(-1); else if (dir === 'right') selectMove(1); return; }
       if (!running) return;
       if (dir === 'right') heldAccel = true;
       else if (dir === 'left') heldBrake = true;
@@ -1346,11 +1384,17 @@ try{
         else if (dir === 'left') heldBrake = false;
       });
     });
-    btn.addEventListener('click', () => {
-      if (!slotEl.classList.contains('active')) return;
-      if (uiState === 'select') return;
-      if (!running){ startGame(); return; }
-    });
+  });
+
+  // botones estilo consola: A confirma/empieza/reintenta, B vuelve a elegir personaje
+  document.getElementById('corre-touch').querySelector('.btn-a').addEventListener('click', () => {
+    if (!slotEl.classList.contains('active')) return;
+    if (uiState === 'select') confirmLeader();
+    else if (!running) startGame();
+  });
+  document.getElementById('corre-touch').querySelector('.btn-b').addEventListener('click', () => {
+    if (!slotEl.classList.contains('active')) return;
+    if (uiState !== 'select' && !running) showSelectScreen();
   });
 
   document.addEventListener('keydown', (e) => {

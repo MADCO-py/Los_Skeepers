@@ -204,7 +204,7 @@
   </div>
   <div class="cart-bar">
     <span id="cart-count-label">Tu carrito está vacío</span>
-    <button class="btn small alt" id="cart-open-btn">🛒 Ver carrito</button>
+    <button class="btn small alt" id="cart-open-btn"><svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.5"></circle><circle cx="18" cy="20" r="1.5"></circle><path d="M2.5 3h2l2.4 12.2a2 2 0 0 0 2 1.6h8.2a2 2 0 0 0 2-1.6L21 8H6"></path></svg> Ver carrito</button>
   </div>
   <div class="merch-grid reveal-stagger" id="merch-grid"></div>
 </section>
@@ -350,6 +350,9 @@
           <button class="frame-opt active" data-frame="none">Sin marco</button>
           <button class="frame-opt" data-frame="star">Estrella</button>
           <button class="frame-opt" data-frame="polaroid">Polaroid</button>
+          <button class="frame-opt" data-frame="rayas">Rayas</button>
+          <button class="frame-opt" data-frame="boleto">Boleto</button>
+          <button class="frame-opt" data-frame="confeti">Confeti</button>
         </div>
       </div>
     </div>
@@ -479,15 +482,16 @@
 <div class="shop-overlay" id="shop-overlay">
   <div class="game-overlay-bar">
     <button class="btn small alt" id="shop-back">‹ Volver a la Tienda</button>
+    <button class="btn small alt" id="shop-detail-cart-btn"><svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.5"></circle><circle cx="18" cy="20" r="1.5"></circle><path d="M2.5 3h2l2.4 12.2a2 2 0 0 0 2 1.6h8.2a2 2 0 0 0 2-1.6L21 8H6"></path></svg> Ver carrito</button>
     <span class="game-overlay-tag eyebrow" id="shop-tag">Tienda</span>
   </div>
   <div class="shop-photo-scatter" id="shop-photo-scatter" aria-hidden="true"></div>
   <div class="game-overlay-body shop-detail-body">
+    <h2 id="shop-detail-name" class="shop-detail-title"></h2>
     <div class="shop-detail-photo-wrap">
       <img id="shop-detail-img" src="" alt="">
     </div>
     <div class="shop-detail-info">
-      <h2 id="shop-detail-name"></h2>
       <p id="shop-detail-desc"></p>
       <div class="shop-size-row">
         <span class="shop-size-label">Elegí talla (y mirá qué le pasa a la foto):</span>
@@ -507,7 +511,7 @@
         </div>
       </div>
       <p class="price" id="shop-detail-price"></p>
-      <button class="btn red" id="shop-add-btn">Agregar al carrito 🛒</button>
+      <button class="btn red" id="shop-add-btn">Agregar al carrito <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.5"></circle><circle cx="18" cy="20" r="1.5"></circle><path d="M2.5 3h2l2.4 12.2a2 2 0 0 0 2 1.6h8.2a2 2 0 0 0 2-1.6L21 8H6"></path></svg></button>
       <p class="shop-added-msg" id="shop-added-msg">¡Agregado! <a href="#" id="shop-view-cart-link">Ver carrito →</a></p>
     </div>
   </div>
@@ -678,7 +682,7 @@
                 <button class="btn red" id="atrapa-select-confirm">ELEGIR Y EMPEZAR</button>
               </div>
               <div class="atrapa-overlay-screen" id="atrapa-start-screen" style="display:none;">
-                <h3>ATRAPA AL SKEEPER</h3>
+                <h3>REÚNE MÁS FANS</h3>
                 <p>PATRULLÁ EL CAMPO<br>RECOGÉ A CADA FAN<br>NUNCA VUELVAS SOBRE LA LÍNEA</p>
                 <button class="btn red" id="atrapa-start-btn">CLICK O ESPACIO PARA EMPEZAR</button>
               </div>
@@ -693,10 +697,16 @@
         </div>
         <!-- controles estilo consola: la pantalla arriba, los botones abajo (solo en mobile) -->
         <div class="atrapa-touch" id="atrapa-touch" aria-hidden="true">
-          <button class="atrapa-up" data-dir="up">▲</button>
-          <button class="atrapa-left" data-dir="left">◀</button>
-          <button class="atrapa-down" data-dir="down">▼</button>
-          <button class="atrapa-right" data-dir="right">▶</button>
+          <div class="dpad">
+            <button data-dir="up">▲</button>
+            <button data-dir="left">◀</button>
+            <button data-dir="right">▶</button>
+            <button data-dir="down">▼</button>
+          </div>
+          <div class="ab-cluster">
+            <button class="btn-b" data-action="b">B</button>
+            <button class="btn-a" data-action="a">A</button>
+          </div>
         </div>
       </div>
     </div>
@@ -726,7 +736,7 @@
                 <button class="btn red" id="corre-select-confirm">ELEGIR Y EMPEZAR</button>
               </div>
               <div class="atrapa-overlay-screen" id="corre-start-screen" style="display:none;">
-                <h3>HORA Y MEDIA CORRIENDO</h3>
+                <h3>HORA Y MEDIA SIN LLEGAR</h3>
                 <p>ACELERÁ O FRENÁ PARA ESQUIVAR<br>RESCATÁ A LOS SKEEPERS<br>LLEGÁ LO MÁS LEJOS QUE PUEDAS</p>
                 <button class="btn red" id="corre-start-btn">CLICK O ESPACIO PARA EMPEZAR</button>
               </div>
@@ -741,10 +751,16 @@
         </div>
         <!-- controles estilo consola: solo izquierda/derecha, el avance es automático -->
         <div class="atrapa-touch corre-touch" id="corre-touch" aria-hidden="true">
-          <button class="corre-up" data-dir="up">▲</button>
-          <button class="corre-left" data-dir="left">◀</button>
-          <button class="corre-right" data-dir="right">▶</button>
-          <button class="corre-down" data-dir="down">▼</button>
+          <div class="dpad">
+            <button data-dir="up">▲</button>
+            <button data-dir="left">◀</button>
+            <button data-dir="right">▶</button>
+            <button data-dir="down">▼</button>
+          </div>
+          <div class="ab-cluster">
+            <button class="btn-b" data-action="b">B</button>
+            <button class="btn-a" data-action="a">A</button>
+          </div>
         </div>
       </div>
     </div>

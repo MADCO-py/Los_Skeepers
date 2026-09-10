@@ -200,7 +200,6 @@ try {
     scatterWrap.innerHTML = '';
     scatterPhotos = [];
     updateQtyDisplay();
-    document.getElementById('shop-tag').textContent = item.name + (item.variant ? ' — ' + item.variant : '');
     document.getElementById('shop-detail-name').textContent = item.name + (item.variant ? ' — ' + item.variant : '');
     document.getElementById('shop-detail-desc').textContent = item.desc;
     document.getElementById('shop-detail-price').textContent = item.price ? 'Q' + item.price : 'Q--';
@@ -264,6 +263,9 @@ try {
   document.getElementById('shop-view-cart-link').addEventListener('click', (e) => {
     e.preventDefault();
     closeShopDetail();
+    openCart();
+  });
+  document.getElementById('shop-detail-cart-btn').addEventListener('click', () => {
     openCart();
   });
 
@@ -1246,8 +1248,12 @@ document.getElementById('montaje-upload').addEventListener('change', (e) => {
     const dataUrl = ev.target.result;
     const imgEl = new Image();
     imgEl.onload = () => {
-      // scale down to a reasonable editing size while keeping the uploaded photo's own aspect ratio
-      const maxDim = 520;
+      // scale down to a reasonable editing size while keeping the uploaded photo's own aspect
+      // ratio — el tope no puede ser un número fijo (520px se desborda en celulares angostos),
+      // tiene que caber en el espacio real disponible del contenedor
+      const wrapPadding = 32; // padding:16px a cada lado del wrap
+      const availW = Math.max(200, canvasWrap.clientWidth - wrapPadding);
+      const maxDim = Math.min(520, availW);
       const scale = Math.min(maxDim / imgEl.width, maxDim / imgEl.height, 1);
       const w = Math.round(imgEl.width * scale);
       const h = Math.round(imgEl.height * scale);
@@ -1350,6 +1356,49 @@ async function buildFramePieces(type, w, h){
     logoImg.scaleToHeight(logoH);
     logoImg.set({ left: bw + 10, top: h - bandH + (bandH - logoH) / 2, selectable:false, evented:false });
     pieces.push(logoImg);
+  } else if (type === 'rayas') {
+    // franja de advertencia arriba/abajo, como el marco de los minijuegos — sin logo,
+    // las rayas ya son la marca
+    const bw = Math.max(14, Math.round(Math.min(w,h) * 0.055));
+    const seg = bw * 1.4;
+    for (let x = 0, i = 0; x < w; x += seg, i++) {
+      const isYellow = i % 2 === 0;
+      pieces.push(mkRect(x, 0, seg, bw, isYellow ? '#F0B429' : '#191512'));
+      pieces.push(mkRect(w - x - seg, h - bw, seg, bw, isYellow ? '#F0B429' : '#191512'));
+    }
+    pieces.push(mkRect(0, 0, bw, h, '#191512'));
+    pieces.push(mkRect(w - bw, 0, bw, h, '#191512'));
+  } else if (type === 'boleto') {
+    // borde rojo con perforación tipo entrada de concierto a los lados
+    const bw = Math.max(10, Math.round(Math.min(w,h) * 0.035));
+    pieces.push(mkRect(0, 0, w, bw, '#C50300'));
+    pieces.push(mkRect(0, h - bw, w, bw, '#C50300'));
+    pieces.push(mkRect(0, 0, bw, h, '#C50300'));
+    pieces.push(mkRect(w - bw, 0, bw, h, '#C50300'));
+    const holeR = Math.max(4, bw * 0.35);
+    const gap = holeR * 3.4;
+    for (let y = gap; y < h - gap; y += gap) {
+      pieces.push(new fabric.Circle({ left: bw / 2 - holeR, top: y - holeR, radius: holeR, fill: '#FBF3E1', selectable:false, evented:false, strokeWidth:0 }));
+      pieces.push(new fabric.Circle({ left: w - bw / 2 - holeR, top: y - holeR, radius: holeR, fill: '#FBF3E1', selectable:false, evented:false, strokeWidth:0 }));
+    }
+    const logoImg = await loadFabricImage('assets/logo-skeepers-black.png');
+    const logoH = bw * 0.85;
+    logoImg.scaleToHeight(logoH);
+    logoImg.set({ left: bw + 10, top: bw + 8, selectable:false, evented:false });
+    pieces.push(logoImg);
+  } else if (type === 'confeti') {
+    // estrellas sueltas cerca de las esquinas, sin borde — más desordenado que el marco "Estrella"
+    const starSize = Math.max(22, Math.min(w, h) * 0.09);
+    const spots = [
+      [6, 6, -18], [w - starSize - 10, 10, 14], [10, h - starSize - 10, 10],
+      [w - starSize - 6, h - starSize - 6, -14], [w / 2 - starSize / 2, 2, 24], [2, h / 2 - starSize / 2, -22]
+    ];
+    for (const [sx, sy, angle] of spots) {
+      const starImg = await loadFabricImage('assets/frame-star-art.png');
+      starImg.set({ left: sx, top: sy, angle, selectable:false, evented:false });
+      starImg.scaleToWidth(starSize);
+      pieces.push(starImg);
+    }
   }
   pieces.forEach(p => p.isFrame = true);
   return pieces;
