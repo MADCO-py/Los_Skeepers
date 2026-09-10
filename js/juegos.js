@@ -5,7 +5,7 @@ try{
     { slug:'codigos',  name:'LOS CÓDIGOS SECRETOS',     ready:false },
     { slug:'memorama', name:'MEMORAMA SKEEPER',         ready:false },
     { slug:'atrapa',   name:'ATRAPA AL SKEEPER',        ready:true  },
-    { slug:'corre',    name:'CORRE Y ESQUIVA',          ready:false },
+    { slug:'corre',    name:'CORRE Y ESQUIVA',          ready:true  },
     { slug:'puzzle',   name:'ROMPECABEZAS DESLIZANTE',  ready:false },
     { slug:'trivia',   name:'TRIVIA SKEEPER',           ready:false },
     { slug:'rasca',    name:'RASCA Y GANA',             ready:false },
@@ -194,6 +194,7 @@ let quizScores = {};
 const quizIntro = document.getElementById('quiz-intro');
 const quizFlow = document.getElementById('quiz-flow');
 const quizResultPanel = document.getElementById('quiz-result');
+const quizTvWrap = document.getElementById('quiz-tv-wrap');
 const quizStart = document.getElementById('quiz-start');
 const quizOptionsEl = document.getElementById('quiz-options');
 const quizQuestionEl = document.getElementById('quiz-question');
@@ -204,6 +205,7 @@ function startQuiz(){
   quizStep = 0;
   quizScores = {};
   Object.keys(MEMBERS).forEach(k => quizScores[k] = 0);
+  quizTvWrap.style.display = '';
   quizIntro.style.display = 'none';
   quizResultPanel.style.display = 'none';
   quizFlow.style.display = 'block';
@@ -248,13 +250,15 @@ function showQuizResult(){
   const totalAnswers = QUIZ_QUESTIONS.length;
   const pct = Math.round((top / totalAnswers) * 100);
   const data = MEMBERS[winner];
+  const photos = window.MEMBER_PHOTOS && window.MEMBER_PHOTOS[winner];
 
-  document.getElementById('result-img').src = 'assets/group-hero.jpg';
+  document.getElementById('result-img').src = photos ? photos.photo : 'assets/group-hero.jpg';
   document.getElementById('result-img').alt = data.name;
   document.getElementById('result-name').textContent = data.name;
   document.getElementById('result-match').textContent = `Sos ${pct}% ${data.name}`;
   document.getElementById('result-fact').textContent = data.fact;
 
+  quizTvWrap.style.display = 'none';
   quizFlow.style.display = 'none';
   quizResultPanel.style.display = 'block';
 }
@@ -412,18 +416,34 @@ try{
     }
   }
 
-  // tamaño fijo/estándar — no se ajusta a la pantalla; el canvas se escala solo por CSS
-  // (width:100%;height:auto) para no verse enorme en pantallas grandes
+  // tamaño fijo — pero se ajusta al alto de la pantalla para que siempre se vea completo,
+  // sin necesidad de hacer scroll (el ancho igual respeta el máximo de siempre)
+  const wrapEl = document.querySelector('#game-slot-atrapa .atrapa-wrap');
+  function fitWrapToViewport(){
+    const bar = document.querySelector('#game-overlay .game-overlay-bar');
+    const barH = bar ? bar.offsetHeight : 0;
+    const sidebarAndGaps = 92 + 8 + 16; // ancho de la barra lateral + separaciones + padding del marco
+    const totalW = sidebarAndGaps + COLS * CELL;
+    const totalH = ROWS * CELL;
+    const aspect = totalW / totalH;
+    const availH = Math.max(260, window.innerHeight - barH - 36);
+    const availW = Math.min(window.innerWidth * 0.92, 1400);
+    const targetW = Math.min(availW, availH * aspect);
+    wrapEl.style.width = Math.floor(targetW) + 'px';
+  }
+
   function sizeCanvas(cb){
     COLS = FIXED_COLS;
     ROWS = FIXED_ROWS;
     canvas.width = COLS * CELL;
     canvas.height = ROWS * CELL;
-    fanTarget = Math.min(10, Math.max(4, Math.round((COLS * ROWS) / 70)));
-    fanMax = fanTarget + 2;
+    fanTarget = 2; // pocos y quietos, no repartidos por todo el tablero
+    fanMax = 2;
     buildBoard();
+    fitWrapToViewport();
     if (cb) cb();
   }
+  window.addEventListener('resize', fitWrapToViewport);
 
   // ---- audio 8-bit sencillo (WebAudio, sin archivos) ----
   let audioCtx = null;
@@ -662,7 +682,7 @@ try{
     }
 
     tickCount++;
-    if (tickCount % FAN_WANDER_EVERY === 0) wanderFans();
+    // los fans se quedan quietos (de frente) en su lugar — ya no deambulan por el tablero
     draw();
   }
 
@@ -857,3 +877,519 @@ document.getElementById('share-download').addEventListener('click', async () => 
 });
 } catch(e) { console.error(e); }
 
+
+
+// ---- CORRE Y ESQUIVA: de lado, corriendo a la izquierda, acelerá/frená para esquivar ----
+try{
+  const MEMBER_ORDER = ['danniel','joaquin','juan','jeremy','alex','shipi'];
+  const MEMBER_COLORS = { danniel:'#C50300', joaquin:'#F0B429', juan:'#2B4C3F', jeremy:'#191512', alex:'#8B5E3C', shipi:'#9C8248' };
+  const SKIN_TONE = '#C68958', HAIR_TONE = '#191512', PANTS_TONE = '#191512';
+  const SHEET_COLS = 4, SHEET_ROWS = 3;
+  const SHEET_ROW_FOR_VIEW = { front: 0, side: 1, back: 2 };
+
+  const SELECT_OPTIONS = [
+    { slug:'danniel', name:'Danniel', desc:'El más rápido para esquivar en seco.' },
+    { slug:'joaquin', name:'Joaquín', desc:'Corre con flow, nunca pierde el estilo.' },
+    { slug:'juan',    name:'Juan',    desc:'Corre más rápido si hay ketchup cerca.' },
+    { slug:'jeremy',  name:'Jeremy',  desc:'Esquiva bailando entre los obstáculos.' },
+    { slug:'alex',    name:'Alex',    desc:'Calcula cada esquive con precisión perfecta.' },
+    { slug:'shipi',   name:'Shipi',   desc:'El más ágil acelerando y frenando en seco.' }
+  ];
+
+  function loadImg(src){ const img = new Image(); img.src = src; return img; }
+
+  const memberSheets = {};
+  MEMBER_ORDER.forEach(slug => { memberSheets[slug] = loadImg('assets/atrapa/' + slug + '-sheet.png'); });
+
+  // obstáculos de banqueta — solo los que tienen sentido como algo con lo que chocarías corriendo
+  const OBSTACLE_NAMES = ['cono', 'hidrante', 'bolardo', 'barrera-roja', 'barrera-amarilla', 'lampara', 'buzon'];
+  const obstacleImgs = OBSTACLE_NAMES.map(n => loadImg('assets/corre/obstaculos/' + n + '.png'));
+
+  // autos que aparecen en la calle (carril de la carretera)
+  const CAR_TYPES = ['sedan1', 'sedan2', 'deportivo', 'camion-cabina', 'camion-caja'];
+  const CAR_COLORS = ['rojo', 'azul', 'amarillo', 'verde'];
+  const carImgs = [];
+  CAR_TYPES.forEach(t => CAR_COLORS.forEach(c => { carImgs.push(loadImg('assets/corre/' + t + '-' + c + '-front.png')); }));
+
+  // fondos de calle, elige uno al azar cada partida
+  const BG_NAMES = ['calle-arboles', 'calle-residencial'];
+
+  // ---- sprite pixel-art de respaldo 8x10 (por si algún día falta una foto) ----
+  const SPRITE_ROWS = [
+    '..HHHH..','.HHHHHH.','.HSESES.','.HSSSSH.','..SSSS..',
+    '.BBBBBB.','.BBBBBB.','.BBBBBB.','.PP..PP.','.PP..PP.'
+  ];
+  const SPRITE_W = 8, SPRITE_H = 10;
+  function drawPixelPerson(ctx, px, py, cell, bodyColor, hairColor){
+    const subW = cell / SPRITE_W, subH = cell / SPRITE_H;
+    for (let r = 0; r < SPRITE_H; r++){
+      const row = SPRITE_ROWS[r];
+      for (let c = 0; c < SPRITE_W; c++){
+        const ch = row[c];
+        if (ch === '.') continue;
+        ctx.fillStyle = ch === 'H' ? hairColor : ch === 'S' ? SKIN_TONE : ch === 'E' ? '#191512' : ch === 'B' ? bodyColor : PANTS_TONE;
+        ctx.fillRect(px + c * subW, py + r * subH, Math.ceil(subW), Math.ceil(subH));
+      }
+    }
+  }
+
+  const slotEl = document.getElementById('game-slot-corre');
+  const canvas = document.getElementById('corre-canvas');
+  const ctx = canvas.getContext('2d');
+  const scoreEl = document.getElementById('corre-score');
+  const startScreen = document.getElementById('corre-start-screen');
+  const overScreen = document.getElementById('corre-over-screen');
+  const overScoreEl = document.getElementById('corre-over-score');
+  const muteBtn = document.getElementById('corre-mute');
+  const canvasWrap = document.getElementById('corre-canvas-wrap');
+  const selectScreen = document.getElementById('corre-select-screen');
+  const selectPortrait = document.getElementById('corre-select-portrait');
+  const selectNameEl = document.getElementById('corre-select-name');
+  const selectDescEl = document.getElementById('corre-select-desc');
+  const selectPrevBtn = document.getElementById('corre-select-prev');
+  const selectNextBtn = document.getElementById('corre-select-next');
+  const selectConfirmBtn = document.getElementById('corre-select-confirm');
+
+  const BASE_W = 960, BASE_H = 540;
+  // 6 espacios de arriba a abajo, tal cual la referencia: banqueta / 4 carriles / banqueta
+  const LANE_ORDER = ['sidewalkTop', 'lane1', 'lane2', 'lane3', 'lane4', 'sidewalkBottom'];
+  const LANE_Y_FRAC = {
+    // medido directamente de capturas reales del fondo: banqueta arriba, 4 carriles
+    // (separados por la línea amarilla al centro), banqueta abajo — antes esto era a ojo
+    // y por eso no calzaba (la de abajo caía en el pasto en vez de en la banqueta)
+    sidewalkTop: 0.28, lane1: 0.365, lane2: 0.455, lane3: 0.545, lane4: 0.635, sidewalkBottom: 0.72
+  };
+  // cada carril mide ~8.9% del alto del canvas — todo tiene que quedar bien por debajo de eso
+  const CHAR_H_FRAC = 0.075;
+  const OBJ_H_FRAC = 0.065;
+  const CAR_H_FRAC = 0.08;
+  const HOME_X_FRAC = 0.40;        // posición de descanso, a la izquierda (los obstáculos vienen de la derecha)
+  const MIN_X_FRAC = 0.24, MAX_X_FRAC = 0.74; // rango de adelantarse/atrasarse
+  const QUEUE_GAP = 30;            // separación de la fila, hacia la izquierda (atrás)
+
+  let uiState = 'select';
+  let selectedLeaderIndex = 0;
+  let running = false;
+  let playerX, homeX, playerLane, playerY;
+  let heldAccel = false, heldBrake = false;
+  let queue, obstacles, rescues, remainingPool;
+  let distance, speed, spawnObsAcc, spawnCarAcc, spawnRescueAcc, invulnMs, animFrame, animAcc;
+  let bgImg, bgOffset;
+  let rafHandle = null, lastT = 0;
+
+  function safeGetMuted(){ try { return localStorage.getItem('skeepers-corre-muted') === '1'; } catch(e){ return false; } }
+  function safeSetMuted(v){ try { localStorage.setItem('skeepers-corre-muted', v ? '1' : '0'); } catch(e){} }
+  let muted = safeGetMuted();
+
+  function sizeCanvas(){
+    canvas.width = BASE_W;
+    canvas.height = BASE_H;
+    fitWrapToViewport();
+  }
+
+  const wrapEl = slotEl.querySelector('.atrapa-wrap');
+  function fitWrapToViewport(){
+    const bar = document.querySelector('#game-overlay .game-overlay-bar');
+    const barH = bar ? bar.offsetHeight : 0;
+    const sidebarAndGaps = 92 + 8 + 16;
+    const totalW = sidebarAndGaps + canvas.width;
+    const totalH = canvas.height;
+    const aspect = totalW / totalH;
+    const availH = Math.max(260, window.innerHeight - barH - 36);
+    const availW = Math.min(window.innerWidth * 0.92, 1400);
+    const targetW = Math.min(availW, availH * aspect);
+    wrapEl.style.width = Math.floor(targetW) + 'px';
+  }
+  window.addEventListener('resize', () => { if (slotEl.classList.contains('active')) fitWrapToViewport(); });
+
+  // ---- audio 8-bit ----
+  let audioCtx = null;
+  function ensureAudio(){ if (audioCtx) return; try{ audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }catch(e){} }
+  function beep(freq, dur, type, vol){
+    if (muted || !audioCtx) return;
+    try{
+      const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
+      osc.type = type || 'square'; osc.frequency.value = freq; gain.gain.value = vol || 0.05;
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      osc.start(); gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + dur);
+      osc.stop(audioCtx.currentTime + dur);
+    }catch(e){}
+  }
+  function sfxRescue(){ beep(560, 0.07, 'square', 0.05); setTimeout(() => beep(820, 0.08, 'square', 0.05), 60); }
+  function sfxHit(){ beep(160, 0.2, 'sawtooth', 0.07); }
+  function sfxOver(){ beep(200, 0.15, 'sawtooth', 0.06); setTimeout(() => beep(110, 0.3, 'sawtooth', 0.07), 130); }
+
+  function updateMuteBtn(){ muteBtn.textContent = muted ? '✕' : '♪'; }
+  function toggleMute(){ muted = !muted; safeSetMuted(muted); updateMuteBtn(); }
+  updateMuteBtn();
+  muteBtn.addEventListener('click', toggleMute);
+
+  // ---- selección de líder ----
+  const selectPortraitCtx = selectPortrait.getContext('2d');
+  function drawSelectPortrait(slug){
+    const sheet = memberSheets[slug];
+    selectPortraitCtx.clearRect(0, 0, selectPortrait.width, selectPortrait.height);
+    if (sheet && sheet.complete && sheet.naturalWidth){
+      const fw = sheet.naturalWidth / SHEET_COLS, fh = sheet.naturalHeight / SHEET_ROWS;
+      const scale = Math.min(selectPortrait.width / fw, selectPortrait.height / fh);
+      const w = fw * scale, h = fh * scale;
+      selectPortraitCtx.imageSmoothingEnabled = false;
+      selectPortraitCtx.drawImage(sheet, 0, 0, fw, fh, (selectPortrait.width - w) / 2, selectPortrait.height - h, w, h);
+    } else {
+      setTimeout(() => { if (SELECT_OPTIONS[selectedLeaderIndex].slug === slug) drawSelectPortrait(slug); }, 150);
+    }
+  }
+  function renderSelect(){
+    const opt = SELECT_OPTIONS[selectedLeaderIndex];
+    selectNameEl.textContent = opt.name.toUpperCase();
+    selectDescEl.textContent = opt.desc;
+    drawSelectPortrait(opt.slug);
+  }
+  function selectMove(delta){
+    selectedLeaderIndex = (selectedLeaderIndex + delta + SELECT_OPTIONS.length) % SELECT_OPTIONS.length;
+    renderSelect();
+  }
+  function showSelectScreen(){
+    uiState = 'select';
+    selectScreen.style.display = 'flex';
+    startScreen.style.display = 'none';
+    overScreen.style.display = 'none';
+    sizeCanvas();
+    resetState();
+    draw();
+    renderSelect();
+  }
+  function confirmLeader(){
+    uiState = 'start';
+    selectScreen.style.display = 'none';
+    startScreen.style.display = 'flex';
+  }
+  selectPrevBtn.addEventListener('click', (e) => { e.stopPropagation(); selectMove(-1); });
+  selectNextBtn.addEventListener('click', (e) => { e.stopPropagation(); selectMove(1); });
+  document.getElementById('corre-select-portrait-wrap').addEventListener('click', (e) => { e.stopPropagation(); selectMove(1); });
+  selectConfirmBtn.addEventListener('click', (e) => { e.stopPropagation(); confirmLeader(); });
+
+  // ---- estado del juego ----
+  function resetState(){
+    homeX = BASE_W * HOME_X_FRAC;
+    playerX = homeX;
+    playerLane = 'lane2'; // arranca en uno de los carriles del centro
+    playerY = canvas.height * LANE_Y_FRAC.lane2;
+    heldAccel = false; heldBrake = false;
+    queue = [];
+    obstacles = [];
+    rescues = [];
+    remainingPool = MEMBER_ORDER.filter(s => s !== SELECT_OPTIONS[selectedLeaderIndex].slug);
+    distance = 0;
+    speed = 0.16; // px por ms
+    spawnObsAcc = 0;
+    spawnCarAcc = 0;
+    spawnRescueAcc = 0;
+    invulnMs = 0;
+    animFrame = 0;
+    animAcc = 0;
+    bgImg = loadImg('assets/corre/' + BG_NAMES[Math.floor(Math.random() * BG_NAMES.length)] + '.jpg');
+    bgOffset = 0;
+    scoreEl.textContent = '0 M';
+  }
+
+  function moveLane(step){
+    const i = LANE_ORDER.indexOf(playerLane);
+    const next = Math.max(0, Math.min(LANE_ORDER.length - 1, i + step));
+    playerLane = LANE_ORDER[next];
+  }
+
+  function drawSheetSprite(sheet, cx, groundY, flip, targetH, view, frame, fallbackColor){
+    if (sheet && sheet.complete && sheet.naturalWidth){
+      const fw = sheet.naturalWidth / SHEET_COLS, fh = sheet.naturalHeight / SHEET_ROWS;
+      const row = SHEET_ROW_FOR_VIEW[view];
+      const sx = (frame % SHEET_COLS) * fw, sy = row * fh;
+      const scale = targetH / fh;
+      const w = fw * scale;
+      ctx.save();
+      if (flip){ ctx.translate(cx, 0); ctx.scale(-1, 1); ctx.translate(-cx, 0); }
+      ctx.drawImage(sheet, sx, sy, fw, fh, cx - w / 2, groundY - targetH, w, targetH);
+      ctx.restore();
+    } else {
+      drawPixelPerson(ctx, cx - 26, groundY - 58, 58, fallbackColor, HAIR_TONE);
+    }
+  }
+
+  // el auto está fotografiado de frente; lo giramos para que su "frente" (la parte de
+  // abajo de la foto original) quede apuntando a la izquierda, como si viniera hacia el personaje
+  function drawRotatedCar(img, cx, cy, targetH){
+    if (!(img && img.complete && img.naturalWidth)) return;
+    const scale = targetH / img.naturalWidth;
+    const w = img.naturalWidth * scale;
+    const h = img.naturalHeight * scale;
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(Math.PI / 2);
+    ctx.drawImage(img, -w / 2, -h / 2, w, h);
+    ctx.restore();
+  }
+
+  function spawnObstacle(){
+    // objetos de banqueta (cono, hidrante, etc.) — banqueta de arriba o de abajo al azar
+    const img = obstacleImgs[Math.floor(Math.random() * obstacleImgs.length)];
+    const lane = Math.random() < 0.5 ? 'sidewalkTop' : 'sidewalkBottom';
+    obstacles.push({ x: canvas.width + 80, lane: lane, img: img, kind: 'object' });
+  }
+
+  function spawnCar(){
+    // autos, en uno de los 4 carriles al azar, vienen de la derecha
+    const img = carImgs[Math.floor(Math.random() * carImgs.length)];
+    const lane = 'lane' + (1 + Math.floor(Math.random() * 4));
+    obstacles.push({ x: canvas.width + 100, lane: lane, img: img, kind: 'car' });
+  }
+
+  function spawnRescue(){
+    if (remainingPool.length === 0) return;
+    const slug = remainingPool[Math.floor(Math.random() * remainingPool.length)];
+    const lane = LANE_ORDER[Math.floor(Math.random() * LANE_ORDER.length)];
+    rescues.push({ x: canvas.width + 80, lane: lane, slug: slug });
+  }
+
+  function loseLife(){
+    if (queue.length > 0){
+      queue.pop();
+      invulnMs = 1100;
+      sfxHit();
+    } else {
+      gameOver();
+    }
+  }
+
+  function gameOver(){
+    running = false;
+    if (rafHandle){ cancelAnimationFrame(rafHandle); rafHandle = null; }
+    sfxOver();
+    overScoreEl.textContent = Math.floor(distance / 10) + ' M';
+    overScreen.style.display = 'flex';
+  }
+
+  function update(dt){
+    distance += speed * dt;
+    speed = Math.min(0.42, 0.16 + distance / 32000);
+    scoreEl.textContent = Math.floor(distance / 10) + ' M';
+
+    animAcc += dt;
+    if (animAcc > 110){ animAcc = 0; animFrame = (animFrame + 1) % SHEET_COLS; }
+
+    // acelerar (adelantarse, hacia la izquierda) o frenar (atrasarse, hacia la derecha)
+    const moveSpeed = 0.45 * dt; // px por ms de desplazamiento propio
+    if (heldAccel) playerX += moveSpeed;
+    else if (heldBrake) playerX -= moveSpeed;
+    else playerX += (homeX - playerX) * Math.min(1, dt / 220); // vuelve solo al centro
+    playerX = Math.max(BASE_W * MIN_X_FRAC, Math.min(BASE_W * MAX_X_FRAC, playerX));
+
+    // se desliza suave entre la calle y la banqueta al cambiar de carril
+    const targetY = canvas.height * LANE_Y_FRAC[playerLane];
+    playerY += (targetY - playerY) * Math.min(1, dt / 140);
+
+    if (invulnMs > 0) invulnMs -= dt;
+
+    const scrollPx = speed * dt;
+    bgOffset += scrollPx;
+
+    const moveObs = scrollPx * 1.15;
+    const hitBox = 26;
+
+    obstacles = obstacles.filter(o => {
+      const prevX = o.x;
+      o.x -= moveObs;
+      if (o.x < -120) return false;
+      if (invulnMs <= 0 && o.lane === playerLane && prevX >= playerX - hitBox && o.x <= playerX + hitBox){
+        loseLife();
+        return false;
+      }
+      return true;
+    });
+
+    rescues = rescues.filter(r => {
+      const prevX = r.x;
+      r.x -= moveObs;
+      if (r.x < -100) return false;
+      if (r.lane === playerLane && prevX >= playerX - hitBox && r.x <= playerX + hitBox){
+        if (queue.length < 5){
+          queue.push(r.slug);
+          remainingPool = remainingPool.filter(s => s !== r.slug);
+          sfxRescue();
+        }
+        return false;
+      }
+      return true;
+    });
+
+    spawnObsAcc += dt;
+    const obsEvery = Math.max(750, 1400 - distance / 30);
+    if (spawnObsAcc > obsEvery){ spawnObsAcc = 0; spawnObstacle(); }
+
+    spawnCarAcc += dt;
+    const carEvery = Math.max(650, 1250 - distance / 28);
+    if (spawnCarAcc > carEvery){ spawnCarAcc = 0; spawnCar(); }
+
+    spawnRescueAcc += dt;
+    if (spawnRescueAcc > 4500 && remainingPool.length > 0){ spawnRescueAcc = 0; spawnRescue(); }
+  }
+
+  function draw(){
+    // fondo de calle, en bucle horizontal (dos copias para que no se vea el corte)
+    if (bgImg && bgImg.complete && bgImg.naturalWidth){
+      const scale = canvas.height / bgImg.naturalHeight;
+      const w = bgImg.naturalWidth * scale;
+      let x = -(bgOffset % w);
+      if (x > 0) x -= w;
+      for (; x < canvas.width; x += w){
+        ctx.drawImage(bgImg, x, 0, w, canvas.height);
+      }
+    } else {
+      ctx.fillStyle = '#3a3a3f';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+
+    const entities = [];
+    rescues.forEach(r => entities.push({ x: r.x, y: canvas.height * LANE_Y_FRAC[r.lane], kind: 'rescue', data: r }));
+    obstacles.forEach(o => entities.push({ x: o.x, y: canvas.height * LANE_Y_FRAC[o.lane], kind: 'obstacle', data: o }));
+    entities.sort((a, b) => a.x - b.x);
+
+    entities.forEach(e => {
+      if (e.kind === 'rescue'){
+        drawSheetSprite(memberSheets[e.data.slug], e.x, e.y, true, canvas.height * CHAR_H_FRAC, 'side', animFrame, MEMBER_COLORS[e.data.slug]);
+      } else if (e.data.kind === 'car'){
+        // el auto viene "de frente" en la foto — lo giramos 90° a la izquierda para que
+        // parezca que viaja hacia el personaje, centrado en su carril (no pegado al piso)
+        drawRotatedCar(e.data.img, e.x, e.y - canvas.height * CAR_H_FRAC * 0.15, canvas.height * CAR_H_FRAC);
+      } else {
+        // objetos de banqueta: pegados al piso de su banqueta, como parados ahí
+        const img = e.data.img;
+        if (img && img.complete && img.naturalWidth){
+          const targetH = canvas.height * OBJ_H_FRAC;
+          const scale = targetH / img.naturalHeight;
+          const w = img.naturalWidth * scale;
+          ctx.drawImage(img, e.x - w / 2, e.y - targetH, w, targetH);
+        }
+      }
+    });
+
+    // fila de rescatados, siguiendo justo detrás (a la derecha) del líder, en su mismo carril
+    for (let i = queue.length - 1; i >= 0; i--){
+      const slug = queue[i];
+      const gx = playerX - (i + 1) * QUEUE_GAP;
+      const flashOff = invulnMs > 0 && Math.floor(invulnMs / 100) % 2 === 0;
+      if (!flashOff) drawSheetSprite(memberSheets[slug], gx, playerY, true, canvas.height * CHAR_H_FRAC, 'side', animFrame, MEMBER_COLORS[slug]);
+    }
+
+    // el líder, siempre de lado mirando hacia la derecha (su dirección de carrera)
+    const leaderSlug = SELECT_OPTIONS[selectedLeaderIndex].slug;
+    const flashOff = invulnMs > 0 && Math.floor(invulnMs / 100) % 2 === 0;
+    if (!flashOff) drawSheetSprite(memberSheets[leaderSlug], playerX, playerY, true, canvas.height * CHAR_H_FRAC, 'side', animFrame, MEMBER_COLORS[leaderSlug]);
+  }
+
+  function loop(t){
+    rafHandle = requestAnimationFrame(loop);
+    if (!running) return;
+    const dt = Math.min(48, t - lastT || 16);
+    lastT = t;
+    update(dt);
+    draw();
+  }
+
+  function startGame(){
+    ensureAudio();
+    resetState();
+    uiState = 'playing';
+    running = true;
+    startScreen.style.display = 'none';
+    overScreen.style.display = 'none';
+    draw();
+    lastT = performance.now();
+    if (rafHandle) cancelAnimationFrame(rafHandle);
+    rafHandle = requestAnimationFrame(loop);
+  }
+
+  function stopLoop(){
+    running = false;
+    if (rafHandle){ cancelAnimationFrame(rafHandle); rafHandle = null; }
+  }
+
+  function showIdle(){
+    stopLoop();
+    showSelectScreen();
+  }
+
+  document.getElementById('corre-start-btn').addEventListener('click', startGame);
+  document.getElementById('corre-retry-btn').addEventListener('click', startGame);
+  document.getElementById('corre-change-btn').addEventListener('click', () => { showSelectScreen(); });
+  canvasWrap.addEventListener('click', () => { if (uiState === 'start') startGame(); });
+
+  document.querySelectorAll('#corre-touch button').forEach(btn => {
+    const dir = btn.dataset.dir;
+    btn.addEventListener('mousedown', () => {
+      if (!running) return;
+      if (dir === 'right') heldAccel = true;
+      else if (dir === 'left') heldBrake = true;
+      else if (dir === 'up') moveLane(-1);
+      else if (dir === 'down') moveLane(1);
+    });
+    btn.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      if (!running) return;
+      if (dir === 'right') heldAccel = true;
+      else if (dir === 'left') heldBrake = true;
+      else if (dir === 'up') moveLane(-1);
+      else if (dir === 'down') moveLane(1);
+    });
+    ['mouseup','mouseleave','touchend','touchcancel'].forEach(evt => {
+      btn.addEventListener(evt, () => {
+        if (dir === 'right') heldAccel = false;
+        else if (dir === 'left') heldBrake = false;
+      });
+    });
+    btn.addEventListener('click', () => {
+      if (!slotEl.classList.contains('active')) return;
+      if (uiState === 'select') return;
+      if (!running){ startGame(); return; }
+    });
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (!slotEl.classList.contains('active')) return;
+    const k = e.key;
+    if (['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','a','A','d','D','w','W','s','S',' '].includes(k)) e.preventDefault();
+    if (k === 'm' || k === 'M'){ toggleMute(); return; }
+    if (uiState === 'select'){
+      if (k === 'ArrowLeft' || k === 'a' || k === 'A') selectMove(-1);
+      else if (k === 'ArrowRight' || k === 'd' || k === 'D') selectMove(1);
+      else if (k === ' ' || k === 'Enter') confirmLeader();
+      return;
+    }
+    if (!running){
+      if (k === ' ' || k === 'r' || k === 'R') startGame();
+      return;
+    }
+    if (k === 'ArrowRight' || k === 'd' || k === 'D') heldAccel = true;
+    else if (k === 'ArrowLeft' || k === 'a' || k === 'A') heldBrake = true;
+    else if (k === 'ArrowUp' || k === 'w' || k === 'W') moveLane(-1);
+    else if (k === 'ArrowDown' || k === 's' || k === 'S') moveLane(1);
+    else if (k === 'r' || k === 'R') startGame();
+  });
+  document.addEventListener('keyup', (e) => {
+    const k = e.key;
+    if (k === 'ArrowRight' || k === 'd' || k === 'D') heldAccel = false;
+    else if (k === 'ArrowLeft' || k === 'a' || k === 'A') heldBrake = false;
+  });
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden){ if (rafHandle){ cancelAnimationFrame(rafHandle); rafHandle = null; } }
+    else if (running && !rafHandle){ lastT = performance.now(); rafHandle = requestAnimationFrame(loop); }
+  });
+
+  const gameOverlayEl2 = document.getElementById('game-overlay');
+  const correSlotObserver = new MutationObserver(() => {
+    if (slotEl.classList.contains('active') && gameOverlayEl2.classList.contains('open')) showIdle();
+    else stopLoop();
+  });
+  correSlotObserver.observe(slotEl, { attributes: true, attributeFilter: ['class'] });
+  correSlotObserver.observe(gameOverlayEl2, { attributes: true, attributeFilter: ['class'] });
+}catch(e){}

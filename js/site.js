@@ -876,6 +876,7 @@ const MEMBER_PHOTOS = {
   juan:    { photo: 'assets/member-juan-1.jpg',    reveal: 'assets/member-juan-2.jpg' },
   shipi:   { photo: 'assets/member-shipi-1.jpg',   reveal: 'assets/member-shipi-2.jpg' }
 };
+window.MEMBER_PHOTOS = MEMBER_PHOTOS; // el quiz (en js/juegos.js) lo necesita fuera de este try
 
 // dibujo a mano + sticker de cuerpo completo por integrante, para decorar el espacio vacío del sidebar
 const MEMBER_ICONS = {

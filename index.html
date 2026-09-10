@@ -616,7 +616,8 @@
         <p>Respondé estas preguntas para saber a quién te parecés más.</p>
       </div>
 
-      <div class="quiz-tv-wrap">
+      <div class="quiz-tv-outer">
+      <div class="quiz-tv-wrap" id="quiz-tv-wrap">
         <img src="assets/shrek-tv.png" class="quiz-tv-frame" alt="">
         <div class="quiz-box xp-glitch-target" id="quiz-box">
         <!-- intro -->
@@ -632,22 +633,23 @@
           <h3 class="quiz-question" id="quiz-question"></h3>
           <div class="quiz-options" id="quiz-options"></div>
         </div>
-
-        <!-- result -->
-        <div class="quiz-panel" id="quiz-result" style="display:none;">
-          <div class="result-card" id="result-card">
-            <span class="eyebrow">Sos...</span>
-            <img id="result-img" src="" alt="">
-            <h2 id="result-name"></h2>
-            <div class="result-match" id="result-match"></div>
-            <p id="result-fact"></p>
-          </div>
-          <div class="result-actions">
-            <button class="btn" id="result-share">Compartir resultado ↗</button>
-            <button class="btn alt" id="result-retry">Volver a intentar</button>
-          </div>
-        </div>
       </div>
+      </div>
+      </div>
+
+      <!-- result: aparte de la pantalla de la PC, propia y grande, fondo negro -->
+      <div class="quiz-panel" id="quiz-result" style="display:none;">
+        <div class="result-card" id="result-card">
+          <span class="eyebrow">Sos...</span>
+          <img id="result-img" src="" alt="">
+          <h2 id="result-name"></h2>
+          <div class="result-match" id="result-match"></div>
+          <p id="result-fact"></p>
+        </div>
+        <div class="result-actions">
+          <button class="btn" id="result-share">Compartir resultado ↗</button>
+          <button class="btn alt" id="result-retry">Volver a intentar</button>
+        </div>
       </div>
     </div>
 
@@ -695,6 +697,54 @@
           <button class="atrapa-left" data-dir="left">◀</button>
           <button class="atrapa-down" data-dir="down">▼</button>
           <button class="atrapa-right" data-dir="right">▶</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CORRE Y ESQUIVA -->
+    <div class="game-slot" id="game-slot-corre">
+      <div class="atrapa-wrap">
+        <div class="atrapa-main-row">
+          <div class="atrapa-sidebar">
+            <span id="corre-score">0 M</span>
+            <button class="atrapa-mute" id="corre-mute" aria-label="Silenciar sonido">♪</button>
+          </div>
+          <div class="atrapa-frame">
+            <div class="atrapa-canvas-wrap" id="corre-canvas-wrap">
+              <canvas id="corre-canvas"></canvas>
+              <div class="atrapa-overlay-screen" id="corre-select-screen">
+                <span class="eyebrow" style="color:var(--mustard)">Elegí quién corre al frente</span>
+                <div class="atrapa-select-row">
+                  <button class="atrapa-select-arrow" id="corre-select-prev" aria-label="Anterior">‹</button>
+                  <div class="atrapa-select-portrait-wrap" id="corre-select-portrait-wrap">
+                    <canvas id="corre-select-portrait" width="220" height="220"></canvas>
+                  </div>
+                  <button class="atrapa-select-arrow" id="corre-select-next" aria-label="Siguiente">›</button>
+                </div>
+                <h3 id="corre-select-name">DANNIEL</h3>
+                <p id="corre-select-desc"></p>
+                <button class="btn red" id="corre-select-confirm">ELEGIR Y EMPEZAR</button>
+              </div>
+              <div class="atrapa-overlay-screen" id="corre-start-screen" style="display:none;">
+                <h3>HORA Y MEDIA CORRIENDO</h3>
+                <p>ACELERÁ O FRENÁ PARA ESQUIVAR<br>RESCATÁ A LOS SKEEPERS<br>LLEGÁ LO MÁS LEJOS QUE PUEDAS</p>
+                <button class="btn red" id="corre-start-btn">CLICK O ESPACIO PARA EMPEZAR</button>
+              </div>
+              <div class="atrapa-overlay-screen" id="corre-over-screen" style="display:none;">
+                <h3>TE ATROPELLARON</h3>
+                <p id="corre-over-score">0 M</p>
+                <button class="btn red" id="corre-retry-btn">ESPACIO PARA JUGAR OTRA VEZ</button>
+                <button class="btn alt" id="corre-change-btn">CAMBIAR PERSONAJE</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- controles estilo consola: solo izquierda/derecha, el avance es automático -->
+        <div class="atrapa-touch corre-touch" id="corre-touch" aria-hidden="true">
+          <button class="corre-up" data-dir="up">▲</button>
+          <button class="corre-left" data-dir="left">◀</button>
+          <button class="corre-right" data-dir="right">▶</button>
+          <button class="corre-down" data-dir="down">▼</button>
         </div>
       </div>
     </div>

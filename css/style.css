@@ -610,7 +610,13 @@ section{position:relative;padding:100px 6vw;max-width:1360px;margin:0 auto;}
   border:var(--line) solid var(--ink);box-shadow:8px 8px 0 var(--ink);
   padding:44px 6vw;position:relative;
 }
-.quiz-tv-wrap{position:relative;max-width:1300px;margin:0 auto;}
+.quiz-tv-outer{
+  /* deja que la PC se salga del ancho angosto de la sección para verse más grande */
+  width:100vw;
+  margin-left:calc(50% - 50vw);
+  margin-right:calc(50% - 50vw);
+}
+.quiz-tv-wrap{position:relative;max-width:min(1750px, 94vw);margin:0 auto;}
 .quiz-tv-frame{width:100%;display:block;position:relative;z-index:2;pointer-events:none;}
 .quiz-tv-wrap .quiz-box{
   position:absolute;left:17%;right:12%;top:29%;bottom:15%;
@@ -619,19 +625,19 @@ section{position:relative;padding:100px 6vw;max-width:1360px;margin:0 auto;}
   display:flex;flex-direction:column;justify-content:flex-start;
 }
 .quiz-tv-wrap .quiz-box .quiz-panel{
-  padding-top:0;margin:auto;width:100%;max-width:480px;
+  padding-top:0;margin:auto;width:100%;max-width:640px;
   max-height:100%;overflow-y:auto;
 }
 .quiz-tv-wrap .quiz-box .quiz-intro-text,
-.quiz-tv-wrap .quiz-box .quiz-question{font-size:0.95rem;}
-.quiz-tv-wrap .quiz-box h3.quiz-question{font-size:1.05rem;line-height:1.28;margin-top:6px;margin-bottom:14px;}
-.quiz-tv-wrap .quiz-box .quiz-step-label{font-size:0.68rem;margin-bottom:4px;}
-.quiz-tv-wrap .quiz-box .quiz-options.photo-options{max-width:300px;margin:0 auto;}
-.quiz-tv-wrap .quiz-box .quiz-option{padding:10px 14px;}
+.quiz-tv-wrap .quiz-box .quiz-question{font-size:clamp(0.95rem, 1.5vw, 1.25rem);}
+.quiz-tv-wrap .quiz-box h3.quiz-question{font-size:clamp(1.1rem, 1.9vw, 1.55rem);line-height:1.28;margin-top:6px;margin-bottom:18px;}
+.quiz-tv-wrap .quiz-box .quiz-step-label{font-size:0.8rem;margin-bottom:8px;}
+.quiz-tv-wrap .quiz-box .quiz-options.photo-options{max-width:420px;margin:0 auto;}
+.quiz-tv-wrap .quiz-box .quiz-option{padding:14px 18px;}
 .quiz-tv-wrap .quiz-box .quiz-options:not(.photo-options){align-items:center;}
-.quiz-tv-wrap .quiz-box .quiz-options:not(.photo-options) .quiz-option{width:100%;max-width:320px;margin:0 auto;}
-.quiz-tv-wrap .quiz-box #quiz-start{display:block;max-width:260px;margin:0 auto;}
-.quiz-tv-wrap .quiz-box .quiz-options{gap:8px;}
+.quiz-tv-wrap .quiz-box .quiz-options:not(.photo-options) .quiz-option{width:100%;max-width:420px;margin:0 auto;}
+.quiz-tv-wrap .quiz-box #quiz-start{display:block;max-width:320px;margin:0 auto;}
+.quiz-tv-wrap .quiz-box .quiz-options{gap:10px;}
 @media (max-width:820px){
   .quiz-tv-wrap .quiz-box{left:17%;right:12%;top:29%;bottom:15%;padding:38px 2vw 6px !important;}
   .quiz-tv-wrap .quiz-box .quiz-intro-text,
@@ -665,18 +671,19 @@ section{position:relative;padding:100px 6vw;max-width:1360px;margin:0 auto;}
 @media (max-width:600px){.quiz-options.photo-options{grid-template-columns:1fr 1fr;}}
 
 .result-card{
-  background:var(--ink);color:var(--cream);padding:40px 30px;
+  background:#000;color:var(--cream);padding:48px 36px;
+  max-width:640px;margin:0 auto;
   border:var(--line) solid var(--ink);position:relative;overflow:hidden;
 }
 .result-card .eyebrow{color:var(--mustard);}
 .result-card img{
-  width:180px;height:180px;object-fit:cover;border-radius:50%;
-  border:5px solid var(--mustard);margin:16px auto;display:block;
+  width:220px;height:220px;object-fit:cover;border-radius:50%;
+  border:5px solid var(--mustard);margin:20px auto;display:block;
 }
-.result-card h2{font-size:clamp(2.2rem,6vw,3.2rem);color:var(--paper);margin-top:6px;}
-.result-match{font-family:'JetBrains Mono',monospace;font-size:1rem;color:var(--mustard);font-weight:700;margin-top:6px;}
-.result-card p{font-family:'Space Grotesk';font-size:1rem;line-height:1.6;margin-top:16px;color:var(--cream);opacity:0.9;}
-.result-actions{display:flex;gap:14px;justify-content:center;margin-top:26px;flex-wrap:wrap;}
+.result-card h2{font-size:clamp(2.4rem,6vw,3.4rem);color:#FFFDF6;margin-top:6px;}
+.result-match{font-family:'JetBrains Mono',monospace;font-size:1.1rem;color:var(--mustard);font-weight:700;margin-top:8px;}
+.result-card p{font-family:'Space Grotesk';font-size:1.1rem;line-height:1.7;margin-top:18px;color:#FFFDF6;opacity:1;}
+.result-actions{display:flex;gap:14px;justify-content:center;margin-top:30px;flex-wrap:wrap;}
 
 /* share sheet */
 .share-sheet{
@@ -1578,6 +1585,16 @@ body.no-motion .member-deco-item{animation:none !important;}
   max-width:none;
   padding:44px 0 90px;
 }
+#game-slot-corre.game-slot{
+  /* mismo problema, mismo arreglo: sin esto quedaba metido en el contenedor angosto de 900px */
+  margin-top:-44px;
+  margin-bottom:-90px;
+  margin-left:calc(50% - 50vw);
+  margin-right:calc(50% - 50vw);
+  width:100vw;
+  max-width:none;
+  padding:44px 0 90px;
+}
 .atrapa-wrap{
   font-family:'Press Start 2P',monospace;
   max-width:min(1400px, 92vw);margin:0 auto;
@@ -1595,7 +1612,8 @@ body.no-motion .member-deco-item{animation:none !important;}
   background:repeating-linear-gradient(45deg,var(--mustard) 0 16px,var(--ink) 16px 32px);
 }
 .atrapa-canvas-wrap{position:relative;width:100%;overflow:hidden;background:#000;}
-#atrapa-canvas{width:100%;height:auto;display:block;image-rendering:pixelated;image-rendering:crisp-edges;}
+#atrapa-canvas,
+#corre-canvas{width:100%;height:auto;display:block;image-rendering:pixelated;image-rendering:crisp-edges;}
 .atrapa-overlay-screen{
   position:absolute;inset:0;background:rgba(25,21,18,0.93);color:var(--cream);
   display:flex;flex-direction:column;align-items:center;justify-content:center;
@@ -1636,6 +1654,12 @@ body.no-motion .member-deco-item{animation:none !important;}
   /* estilo consola: la pantalla arriba, los botones abajo, uno debajo del otro */
   .atrapa-touch{display:grid;}
 }
+/* CORRE Y ESQUIVA: solo izquierda/derecha, dos botones grandes en vez de la cruceta */
+.corre-touch{grid-template-columns:repeat(2,84px);grid-template-rows:repeat(3,58px);}
+.corre-touch .corre-up{grid-column:1 / span 2;grid-row:1;}
+.corre-touch .corre-left{grid-column:1;grid-row:2;}
+.corre-touch .corre-right{grid-column:2;grid-row:2;}
+.corre-touch .corre-down{grid-column:1 / span 2;grid-row:3;}
 @media (max-width:600px){
   .game-overlay-bar{padding:14px 5vw;}
   .game-back{font-size:0.68rem;padding:8px 12px;}
