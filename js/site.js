@@ -466,7 +466,14 @@ try {
         `(Si yo aún te quería aquí)`, `(Son las cinco y no puedo dormir)`,
         `(El tiempo será eterno en ti)`, `(El tiempo será eterno en ti)`,
       ] },
-    { id: 'hora-y-media', title: 'Hora y Media', credit: 'Los Skeepers', cover: 'assets/covers/hora-y-media.jpg', trackId: null,
+    { id: 'hora-y-media', title: 'Hora y Media', credit: 'Los Skeepers', cover: 'assets/covers/hora-y-media.jpg', trackId: null, audioSrc: 'assets/audio/hora-y-media.mp3', vocalsStart: 40,
+      // tiempos estimados por línea (en segundos) — se calcularon a partir de dónde
+      // arranca a cantar (seg. 40) y dónde empieza el silencio final (seg. 252),
+      // repartiendo el tiempo entre medio según el largo de cada línea. No vienen de
+      // una transcripción real palabra por palabra, así que pueden no calzar perfecto
+      // en cada verso — si hace falta afinar alguno, decime en qué segundo entra
+      // una línea puntual y se lo ajusto.
+      lineTimestamps: [40.0, 45.15, 49.19, 54.79, 60.39, 64.88, 69.36, 74.96, 80.34, 91.1, 96.47, 101.63, 104.77, 107.9, 112.16, 117.99, 122.69, 128.3, 133.9, 138.16, 143.76, 149.14, 154.29, 160.12, 164.38, 169.75, 174.91, 178.05, 181.18, 185.44, 191.27, 195.97, 201.58, 204.71, 207.85, 210.99, 214.13, 219.51, 224.66, 227.8, 230.93, 235.86, 241.69, 246.4],
       lyrics: [
         `Voy pensándolo otra vez`, `Y no puedo avanzar`, `Mil razones para regresar`,
         `Y ya voy tarde y al revés`, `Por hora y media más`, `Condenados a esperar`, ``,
@@ -576,18 +583,39 @@ try {
   const karaokeOverlay = document.getElementById('karaoke-overlay');
   const karaokeBg = document.getElementById('karaoke-bg');
   let karaokeTimer = null;
+  let karaokeDelayTimer = null;
   let karaokeOn = false;
   let karaokeLineEls = [];
   let karaokeIndex = 0;
+  let currentKaraokeSong = null;
 
   function stopKaraoke(){
     karaokeOn = false;
     if (karaokeTimer) clearInterval(karaokeTimer);
+    if (karaokeDelayTimer) clearTimeout(karaokeDelayTimer);
     karaokeTimer = null;
+    karaokeDelayTimer = null;
     const btn = document.getElementById('karaoke-toggle');
     btn.textContent = '▶ Modo karaoke';
     btn.classList.remove('playing');
     karaokeLineEls.forEach(el => el.classList.remove('active'));
+    const audio = document.getElementById('karaoke-audio');
+    if (audio) { try { audio.pause(); } catch(e){} audio.removeEventListener('timeupdate', karaokeTimeUpdateHandler); }
+  }
+
+  // sigue el tiempo real del audio en vez de contar a ciegas — si el usuario pausa,
+  // adelanta o atrasa la canción, la letra que se resalta se ajusta sola
+  let karaokeTimeUpdateHandler = null;
+  function runKaraokeByTimestamps(audio, timestamps){
+    const nonBlank = karaokeLineEls.filter(el => !el.classList.contains('blank'));
+    karaokeTimeUpdateHandler = () => {
+      const t = audio.currentTime;
+      let idx = -1;
+      for (let i = 0; i < timestamps.length; i++){ if (t >= timestamps[i]) idx = i; else break; }
+      nonBlank.forEach((el, i) => el.classList.toggle('active', i === idx));
+      if (idx >= 0 && nonBlank[idx]) nonBlank[idx].scrollIntoView({ block: 'center', behavior: 'smooth' });
+    };
+    audio.addEventListener('timeupdate', karaokeTimeUpdateHandler);
   }
 
   function startKaraoke(){
@@ -597,21 +625,65 @@ try {
     btn.textContent = '⏸ Pausar';
     btn.classList.add('playing');
     const nonBlank = karaokeLineEls.filter(el => !el.classList.contains('blank'));
+
+    const audio = document.getElementById('karaoke-audio');
+    if (audio){ audio.currentTime = 0; try { audio.play().catch(() => {}); } catch(e){} }
+
     if (nonBlank.length === 0) return;
-    karaokeTimer = setInterval(() => {
-      karaokeLineEls.forEach(el => el.classList.remove('active'));
-      if (karaokeIndex >= nonBlank.length){ stopKaraoke(); return; }
-      const el = nonBlank[karaokeIndex];
-      el.classList.add('active');
-      el.scrollIntoView({ block: 'center', behavior: 'smooth' });
-      karaokeIndex++;
-    }, 2600);
+
+    // si tenemos tiempos reales por línea (para esta canción, calculados a partir del
+    // audio real), seguimos el reloj de la canción; si no, usamos el estimado genérico
+    if (audio && currentKaraokeSong && currentKaraokeSong.lineTimestamps){
+      runKaraokeByTimestamps(audio, currentKaraokeSong.lineTimestamps);
+      return;
+    }
+
+    const runLoop = () => {
+      karaokeTimer = setInterval(() => {
+        karaokeLineEls.forEach(el => el.classList.remove('active'));
+        if (karaokeIndex >= nonBlank.length){ stopKaraoke(); return; }
+        const el = nonBlank[karaokeIndex];
+        el.classList.add('active');
+        el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        karaokeIndex++;
+      }, 2600);
+    };
+    // si la canción tiene intro instrumental, las letras esperan a que empiece a cantar
+    const delayMs = (currentKaraokeSong && currentKaraokeSong.vocalsStart ? currentKaraokeSong.vocalsStart : 0) * 1000;
+    if (delayMs > 0) karaokeDelayTimer = setTimeout(runLoop, delayMs);
+    else runLoop();
+  }
+
+  // ---- control de volumen propio, con estrellitas que se van llenando ----
+  function wireKaraokeVolume(){
+    const audio = document.getElementById('karaoke-audio');
+    const stars = document.querySelectorAll('#kv-stars .kv-star');
+    const btnDown = document.getElementById('kv-down');
+    const btnUp = document.getElementById('kv-up');
+    if (!audio || !stars.length) return;
+    let level = 3; // de 0 a 5 estrellas, arranca a medio volumen
+    function render(prevLevel){
+      audio.volume = level / 5;
+      stars.forEach((s, i) => {
+        s.classList.toggle('filled', i < level);
+      });
+      if (prevLevel !== undefined && prevLevel !== level){
+        const changedIdx = Math.max(prevLevel, level) - 1;
+        const star = stars[Math.max(0, Math.min(stars.length - 1, changedIdx))];
+        star.classList.remove('pop'); void star.offsetWidth; star.classList.add('pop');
+      }
+    }
+    render();
+    btnDown.addEventListener('click', () => { const prev = level; level = Math.max(0, level - 1); render(prev); });
+    btnUp.addEventListener('click', () => { const prev = level; level = Math.min(5, level + 1); render(prev); });
   }
 
   function openKaraoke(id){
     const song = SONGS.find(s => s.id === id);
     if (!song) return;
-    document.getElementById('karaoke-tag').textContent = song.title;
+    currentKaraokeSong = song;
+    const karaokeTagEl = document.getElementById('karaoke-tag');
+    if (karaokeTagEl) karaokeTagEl.textContent = song.title;
     document.getElementById('karaoke-cover').src = song.cover;
     document.getElementById('karaoke-cover').alt = song.title;
     document.getElementById('karaoke-title').textContent = song.title;
@@ -623,7 +695,17 @@ try {
     });
 
     const player = document.getElementById('karaoke-player');
-    if (song.trackId){
+    if (song.audioSrc){
+      player.innerHTML = `<audio preload="none" id="karaoke-audio"><source src="${song.audioSrc}" type="audio/mpeg"></audio>
+        <div class="karaoke-volume-fun" id="karaoke-volume-fun">
+          <button class="kv-btn" id="kv-down" type="button" aria-label="Bajar el volumen">−</button>
+          <div class="kv-stars" id="kv-stars">
+            <span class="kv-star"></span><span class="kv-star"></span><span class="kv-star"></span><span class="kv-star"></span><span class="kv-star"></span>
+          </div>
+          <button class="kv-btn" id="kv-up" type="button" aria-label="Subir el volumen">+</button>
+        </div>`;
+      wireKaraokeVolume();
+    } else if (song.trackId){
       player.innerHTML = `<iframe src="https://open.spotify.com/embed/track/${song.trackId}?utm_source=generator" width="100%" height="152" frameBorder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>`;
     } else {
       player.innerHTML = `<a class="btn small" href="https://open.spotify.com/artist/3q9JMhPqxoWXTqoYfJs2RP" target="_blank" rel="noopener">Escuchála en Spotify ↗</a>`;
@@ -963,16 +1045,37 @@ function openMember(slug){
   overlay.classList.add('open');
   document.body.classList.add('lock');
   if (!wasOpen) overlay.scrollTop = 0;
-  history.replaceState(null, '', '#' + slug);
+  // pushState (no replaceState) para que el botón "atrás" del navegador
+  // cierre la ficha del integrante en vez de irse del sitio
+  try {
+    if (!(history.state && history.state.memberSlug === slug)) {
+      history.pushState({ memberSlug: slug }, '', '#' + slug);
+    }
+  } catch(e){}
 }
-function closeMember(){
+// fromPopState=true cuando nos llama el listener de popstate (el usuario ya
+// se movió en el historial, así que acá NO hay que tocarlo de nuevo)
+function closeMember(fromPopState){
   overlay.classList.remove('open');
   document.body.classList.remove('lock');
   document.getElementById('m-playlist').src = '';
   document.querySelectorAll('#wa-body audio').forEach(a => a.pause());
-  history.replaceState(null, '', '#integrantes');
+  if (!fromPopState){
+    try {
+      if (history.state && history.state.memberSlug) history.back();
+      else history.replaceState(null, '', '#integrantes');
+    } catch(e){}
+  }
 }
-document.getElementById('member-close').addEventListener('click', closeMember);
+document.getElementById('member-close').addEventListener('click', () => closeMember(false));
+
+// el botón "atrás" del navegador dispara esto: si la ficha seguía abierta y
+// el nuevo estado ya no tiene el memberSlug, es que el usuario quiso salir
+window.addEventListener('popstate', () => {
+  if (overlay.classList.contains('open') && !(history.state && history.state.memberSlug)){
+    closeMember(true);
+  }
+});
 
 // ---- chat estilo WhatsApp dentro de cada integrante: el usuario escribe lo que quiera,
 // las respuestas van saliendo en orden fijo (1a, 2a, 3a...) hasta un máximo de 5 mensajes.

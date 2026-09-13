@@ -50,7 +50,6 @@
     <a href="#videos">Videos</a>
     <a href="#prensa">Menciones / Prensa</a>
     <a href="#juegos">Sala de Juegos</a>
-    <a href="#quiz" class="nav-game-link" data-game="quiz">¿Qué Skeeper Sos?</a>
     <a href="#montaje">Móntate</a>
     <a href="#seguir">Síguenos</a>
   </div>
@@ -430,7 +429,6 @@
 <div class="shop-overlay karaoke-overlay" id="karaoke-overlay">
   <div class="game-overlay-bar">
     <button class="btn small alt" id="karaoke-back">‹ Volver a Nuestra Música</button>
-    <span class="game-overlay-tag eyebrow" id="karaoke-tag">Karaoke</span>
   </div>
   <div class="karaoke-bg" id="karaoke-bg"></div>
   <div class="karaoke-layout">
@@ -483,7 +481,6 @@
   <div class="game-overlay-bar">
     <button class="btn small alt" id="shop-back">‹ Volver a la Tienda</button>
     <button class="btn small alt" id="shop-detail-cart-btn"><svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.5"></circle><circle cx="18" cy="20" r="1.5"></circle><path d="M2.5 3h2l2.4 12.2a2 2 0 0 0 2 1.6h8.2a2 2 0 0 0 2-1.6L21 8H6"></path></svg> Ver carrito</button>
-    <span class="game-overlay-tag eyebrow" id="shop-tag">Tienda</span>
   </div>
   <div class="shop-photo-scatter" id="shop-photo-scatter" aria-hidden="true"></div>
   <div class="game-overlay-body shop-detail-body">
@@ -521,7 +518,6 @@
 <div class="shop-overlay" id="cart-overlay">
   <div class="game-overlay-bar">
     <button class="btn small alt" id="cart-back">‹ Seguir viendo la tienda</button>
-    <span class="game-overlay-tag eyebrow">Tu carrito</span>
   </div>
   <div class="game-overlay-body">
     <div id="cart-empty-msg" class="cart-empty">Todavía no agregás nada. Andá a la tienda y elegí algo bonito.</div>
@@ -607,19 +603,12 @@
 <!-- GAME OVERLAY: cada minijuego abre aquí, como si fuera "otra pestaña" navegable con botón de volver -->
 <div class="game-overlay" id="game-overlay">
   <div class="game-overlay-bar">
-    <button class="btn small alt game-back" id="game-back">‹ Volver a la Sala de Juegos</button>
-    <span class="game-overlay-tag eyebrow" id="game-overlay-tag">Sala de juegos</span>
+    <button class="btn small alt game-back" id="game-back" aria-label="Volver a la Sala de Juegos" title="Volver a la Sala de Juegos">←</button>
   </div>
   <div class="game-overlay-body">
 
     <!-- ¿QUÉ SKEEPER SOS? -->
     <div class="game-slot" id="game-slot-quiz">
-      <div class="section-head">
-        <span class="eyebrow">Descubrí</span>
-        <h2>¿Qué Skeeper Sos?</h2>
-        <p>Respondé estas preguntas para saber a quién te parecés más.</p>
-      </div>
-
       <div class="quiz-tv-outer">
       <div class="quiz-tv-wrap" id="quiz-tv-wrap">
         <img src="assets/shrek-tv.png" class="quiz-tv-frame" alt="">
@@ -766,6 +755,413 @@
     </div>
 
 
+    <!-- ================================================================
+         JUEGO DE CÓDIGO SECRETO — 5 niveles. Vive como un game-slot más,
+         igual que Atrapa/Corre/Quiz: usa la misma navegación de "pestaña"
+         del sitio (el botón "‹ Volver a la Sala de Juegos" de arriba).
+         Estética de compu vieja: monitor CRT beige con líneas de escaneo.
+
+         REFERENCIA DE DÓNDE ESTÁ CADA CÓDIGO (para el futuro):
+         - Nivel 1 "ESTRELLA": autocontenido, la pista apunta al motivo de
+           la estrella que se repite por todo el sitio (logo, footer, etc).
+         - Nivel 2 "CONTRALUZ": pantalla en negro, el mouse hace de linterna;
+           la palabra "Hora y Media" está repartida en varias copias invisibles
+           por toda la pantalla, y se revelan letra por letra donde pasa la luz
+           — hay que ir al Karaoke y leer la letra de esa canción para
+           encontrar la palabra del coro ("...y a contraluz").
+         - Nivel 3: el jugador prende su cámara con el botón (integrado en la
+           barra de título azul, sin forma de apagarla de nuevo). Mientras
+           está activa, aparece "2:40pm" sobrepuesto — PERO ese texto es
+           solo decorativo/despiste. El código real para pasar de nivel es
+           "Si te gusta?" (el mismo código que el nivel 5 — a propósito,
+           así se pidió explícitamente, no es un error). Ya NO usa el emoji del footer (el 🎭 con
+           "footer-aside" quedó ahí sin uso, vestigio de una versión
+           anterior — se puede borrar si molesta).
+         - Nivel 4: el emoji 🐨 de ESTA MISMA pantalla (buscá scg-emoji-3 acá
+           abajo, el id quedó igual aunque ahora es el nivel 4) tiene
+           escondido el texto plano "Los_Skeepers" — con caracteres
+           invisibles de unión (ZWNJ=0/ZWJ=1, 16 bits por letra), no con
+           selectores de variación. El emoji lo generó el usuario con otra
+           herramienta, no hace falta que lo regeneres vos.
+         - Nivel 5: código "Si te gusta?" — autocontenido, sin pista visible
+           a propósito (el texto en pantalla es solo "Dura...").
+         - Botón de apagado (esquina inferior izquierda del monitor): no está
+           atado a ningún nivel todavía, es un huevo de pascua aparte. Al
+           apagar hace la animación de colapso estilo CRT viejo y muestra el
+           número "6" como reflejo tenue en la pantalla apagada; al volver a
+           prender, la animación al revés. Si en el futuro el "6" tiene que
+           ser parte de un código, buscá "scg-power-btn" acá abajo.
+
+         Las respuestas correctas NO están en texto plano en el JS — están
+         hasheadas (SHA-256). El progreso se guarda en localStorage con una
+         prueba encadenada (ver SCG_SALT en el <script> de más abajo) para
+         que no se pueda hacer trampa editando localStorage a mano sin saber
+         las respuestas reales, y nunca depende de la URL.
+         ================================================================ -->
+    <style>
+    .scg-crt{
+      position:relative;z-index:5;width:min(600px,100%);margin:0 auto;
+      background:linear-gradient(160deg,#eee5d3,#c7bca4);
+      border-radius:26px;padding:24px 24px 42px;
+      box-shadow:0 24px 60px rgba(0,0,0,0.35), inset 0 2px 0 rgba(255,255,255,0.5);
+      border:2px solid #8a8272;
+    }
+    .scg-crt-vents{
+      position:absolute;top:9px;right:20px;width:56px;height:7px;
+      background:repeating-linear-gradient(to right,#8a8272 0 3px,transparent 3px 6px);
+      border-radius:2px;
+    }
+    .scg-crt-led{position:absolute;top:10px;left:20px;width:7px;height:7px;border-radius:50%;background:#3fb84a;box-shadow:0 0 5px #3fb84a;}
+    .scg-crt-brand{
+      position:absolute;bottom:12px;left:50%;transform:translateX(-50%);
+      font-family:'JetBrains Mono',monospace;font-size:0.58rem;letter-spacing:3px;color:#8a8272;
+    }
+    .scg-power-btn{
+      position:absolute;bottom:8px;left:16px;z-index:6;
+      width:22px;height:22px;border-radius:50%;border:1px solid #5c5648;
+      background:linear-gradient(180deg,#4a4438,#26221c);color:#c9c2ac;
+      cursor:pointer;padding:4px;display:flex;align-items:center;justify-content:center;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,0.15);
+    }
+    .scg-power-btn svg{width:100%;height:100%;}
+    .scg-power-btn.scg-power-off{color:#c50300;}
+
+    /* animación de apagado/encendido tipo CRT viejo: la pantalla se colapsa
+       a una rayita y después a un puntito, y al revés para encender */
+    .scg-window.scg-powering-off{animation:scgPowerOff 0.6s ease-in forwards;}
+    .scg-window.scg-powering-on{animation:scgPowerOn 0.7s ease-out forwards;}
+    @keyframes scgPowerOff{
+      0%{transform:scale(1,1);opacity:1;filter:brightness(1);}
+      55%{transform:scale(1,0.02);opacity:1;filter:brightness(2.2);}
+      80%{transform:scale(0.02,0.02);opacity:1;filter:brightness(3);}
+      100%{transform:scale(0.02,0.02);opacity:0;filter:brightness(3);}
+    }
+    @keyframes scgPowerOn{
+      0%{transform:scale(0.02,0.02);opacity:0;filter:brightness(3);}
+      20%{transform:scale(0.02,0.02);opacity:1;filter:brightness(3);}
+      55%{transform:scale(1,0.02);opacity:1;filter:brightness(2.2);}
+      100%{transform:scale(1,1);opacity:1;filter:brightness(1);}
+    }
+    .scg-power-overlay{
+      position:absolute;inset:0;z-index:45;background:#000;display:none;
+      align-items:center;justify-content:center;
+      font-family:'Press Start 2P',monospace;font-size:3rem;
+      color:rgba(255,255,255,0.12);text-shadow:0 0 18px rgba(255,255,255,0.25);
+    }
+    .scg-power-overlay.scg-show-power{display:flex;animation:scgSixFade 2.4s ease-out forwards;}
+    @keyframes scgSixFade{
+      0%{opacity:0;}
+      15%{opacity:1;}
+      75%{opacity:1;}
+      100%{opacity:0.35;}
+    }
+    /* base del monitor, para que no quede "flotando" */
+    .scg-crt-stand{
+      position:relative;z-index:5;width:min(180px,40%);height:14px;margin:0 auto;
+      background:linear-gradient(160deg,#d8cdb4,#a89c82);
+      border:2px solid #8a8272;border-top:none;
+      border-radius:0 0 10px 10px;
+    }
+    .scg-crt-base{
+      position:relative;z-index:5;width:min(280px,60%);height:8px;margin:0 auto;
+      background:linear-gradient(160deg,#c7bca4,#8a8272);
+      border-radius:0 0 50% 50% / 0 0 100% 100%;
+      box-shadow:0 6px 14px rgba(0,0,0,0.3);
+    }
+    /* teclado, debajo de todo el mueble, para que se vea una compu completa */
+    .scg-keyboard{
+      position:relative;z-index:5;width:min(520px,92%);margin:16px auto 0;
+      background:linear-gradient(160deg,#eee5d3,#c7bca4);
+      border:2px solid #8a8272;border-radius:10px;padding:10px 14px 12px;
+      box-shadow:0 10px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.5);
+    }
+    .scg-keyboard-row{display:flex;gap:4px;margin-bottom:4px;}
+    .scg-keyboard-row:last-child{margin-bottom:0;}
+    .scg-key{
+      flex:1;height:12px;background:#f7f1e4;border:1px solid #a89f8a;border-radius:2px;
+      box-shadow:0 1px 0 #8a8272;min-width:6px;
+    }
+    .scg-key.wide{flex:4;}
+    .scg-key.xwide{flex:9;}
+    @media (max-width:480px){.scg-keyboard{display:none;}}
+    .scg-crt-screen{
+      position:relative;background:#000;border-radius:12px;padding:6px;
+      box-shadow:inset 0 0 34px rgba(0,0,0,0.95), inset 0 0 0 6px #2b2820;
+      overflow:hidden;
+    }
+    .scg-scanlines{
+      position:absolute;inset:0;z-index:30;pointer-events:none;
+      background:repeating-linear-gradient(to bottom, rgba(0,0,0,0.16) 0px, rgba(0,0,0,0.16) 1px, transparent 2px, transparent 3px);
+      animation:scgFlicker 6.5s infinite;
+    }
+    @keyframes scgFlicker{
+      0%,95%,100%{opacity:0.45;}
+      96%{opacity:0.25;}
+      97%{opacity:0.6;}
+      98%{opacity:0.3;}
+    }
+    .scg-crt-vignette{
+      position:absolute;inset:0;z-index:29;pointer-events:none;border-radius:8px;
+      box-shadow:inset 0 0 70px rgba(0,0,0,0.6);
+    }
+    .scg-window{
+      position:relative;width:100%;height:480px;overflow:hidden;
+      background:var(--paper);border-radius:6px;
+      display:flex;flex-direction:column;
+    }
+    .scg-body{padding:34px 28px;flex:1;overflow-y:auto;overflow-x:hidden;min-height:0;position:relative;border-radius:6px 6px 0 0;}
+    .scg-level{display:none;height:100%;box-sizing:border-box;}
+    .scg-level.active{display:flex;flex-direction:column;justify-content:center;}
+    .scg-challenge{font-size:1.05rem;line-height:1.5;margin:6px 0 14px;}
+    .scg-hint{font-family:'JetBrains Mono',monospace;font-size:0.78rem;opacity:0.65;margin-bottom:22px;}
+    .scg-input-row{display:flex;gap:10px;flex-wrap:wrap;position:relative;flex:none;}
+    .scg-input{
+      flex:1;min-width:160px;font-family:'JetBrains Mono',monospace;font-size:0.95rem;
+      padding:12px 14px;border:var(--line) solid var(--ink);border-radius:6px;
+      background:var(--cream);color:var(--ink);position:relative;
+    }
+    .scg-input:focus{outline:2px solid var(--mustard);outline-offset:1px;}
+    .scg-error{
+      display:none;
+      font-family:'Press Start 2P',monospace;font-size:0.6rem;color:var(--red);
+      margin-top:16px;
+    }
+    .scg-error.show{
+      display:block;
+      font-size:0.7rem;color:#ff1414;
+      text-shadow:0 0 6px rgba(255,0,0,0.6), 1px 1px 0 #4a0000;
+      animation:scgErrorPulse 0.35s ease;
+    }
+    @keyframes scgErrorPulse{
+      0%{transform:scale(1.25);opacity:0;}
+      50%{transform:scale(0.95);opacity:1;}
+      100%{transform:scale(1);opacity:1;}
+    }
+
+    /* al fallar, lo ÚNICO que glitchea es la palabra ERROR (separación de
+       color estilo señal corrupta) — nada más en la pantalla se mueve */
+    .scg-error.scg-error-glitchy{
+      animation:scgErrorPulse 0.5s ease, scgErrorGlitchText 0.6s steps(1,end);
+    }
+    @keyframes scgErrorGlitchText{
+      0%,100%{text-shadow:0 0 10px rgba(255,0,0,0.75), 2px 2px 0 #4a0000;}
+      20%{text-shadow:-3px 0 0 #00e6ff, 3px 0 0 #ff00a0;}
+      40%{text-shadow:3px 0 0 #00e6ff, -3px 0 0 #ff00a0;}
+      60%{text-shadow:-2px 2px 0 #00e6ff, 2px -2px 0 #ff00a0;}
+      80%{text-shadow:0 0 10px rgba(255,0,0,0.75), 2px 2px 0 #4a0000;}
+    }
+
+    /* ---- nivel 2: cuarto oscuro, la palabra escondida en varias copias,
+       invisible hasta que la linterna del mouse pasa encima ---- */
+    #scg-level-2{position:absolute;inset:-34px -28px;background:#000;overflow:hidden;padding:34px 28px;box-sizing:border-box;display:none;}
+    #scg-level-2.active{display:flex;flex-direction:column;justify-content:center;}
+    .scg-hidden-words{position:absolute;inset:0;z-index:1;overflow:hidden;}
+    .scg-hidden-word{
+      position:absolute;font-family:'Press Start 2P',monospace;font-size:0.8rem;
+      color:#fff;white-space:nowrap;user-select:text;
+    }
+    .scg-mask-overlay{
+      position:absolute;inset:0;z-index:2;background:#000;pointer-events:none;
+      -webkit-mask-image:radial-gradient(circle 80px at var(--sx,-999px) var(--sy,-999px), rgba(0,0,0,0) 0%, rgba(0,0,0,0) 45%, rgba(0,0,0,1) 100%);
+      mask-image:radial-gradient(circle 80px at var(--sx,-999px) var(--sy,-999px), rgba(0,0,0,0) 0%, rgba(0,0,0,0) 45%, rgba(0,0,0,1) 100%);
+      -webkit-mask-mode:alpha;mask-mode:alpha;
+    }
+    .scg-level2-content{position:relative;z-index:3;}
+    .scg-eyebrow-light{color:var(--mustard) !important;}
+    .scg-challenge-light{color:#e8e2d4;}
+    .scg-error-light.show{color:#ff6b5f;}
+
+    .scg-emoji{font-size:1.3rem;cursor:text;user-select:text;}
+
+    /* nivel 4: ícono de cámara arriba a la derecha de la mini PC, y cuando
+       está prendida, la cámara del usuario ocupa TODA la pantalla del
+       monitor (tapa titlebar, menú y contenido), con "2:40pm" sobrepuesto (el código a escribir NO es lo que se ve en
+       pantalla, es "Si te gusta?" — a propósito, según se pidió) */
+    .scg-camera-icon-btn{
+      display:none;width:22px;height:20px;position:absolute;top:14px;right:14px;z-index:90;
+      border-radius:2px;border:1px solid #0a3ea8;
+      background:linear-gradient(180deg,#eaf4ff 0%,#a9d3ff 45%,#5fa8f0 46%,#2e79d6 100%);
+      color:#0a2a5e;cursor:pointer;padding:3px;
+      align-items:center;justify-content:center;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,0.8), 0 1px 4px rgba(0,0,0,0.5);
+      animation:scgCamBtnFlicker 5s infinite;
+    }
+    .scg-camera-icon-btn.scg-show-icon{display:flex;}
+    .scg-camera-icon-btn.scg-camera-active{
+      background:linear-gradient(180deg,#ffd7d7 0%,#ff9a9a 45%,#e14b4b 46%,#a30000 100%);
+      color:#4a0000;cursor:not-allowed;
+    }
+    .scg-camera-icon-btn svg{width:100%;height:100%;}
+    @keyframes scgCamBtnFlicker{
+      0%,89%,100%{opacity:1;filter:none;}
+      90%{opacity:0.55;filter:hue-rotate(40deg);}
+      91%{opacity:1;filter:none;}
+      93%{opacity:0.7;filter:hue-rotate(-30deg);}
+      94%{opacity:1;filter:none;}
+    }
+    .scg-camera-fullscreen{
+      position:absolute;inset:0;z-index:50;background:#000;display:none;
+    }
+    .scg-camera-fullscreen.scg-camera-on{display:block;}
+    .scg-camera-video{width:100%;height:100%;object-fit:cover;display:block;transform:scaleX(-1);}
+    .scg-camera-overlay{
+      position:absolute;bottom:8px;right:10px;font-family:'JetBrains Mono',monospace;
+      font-size:0.62rem;color:rgba(255,255,255,0.28);letter-spacing:0.5px;
+      text-shadow:0 1px 2px rgba(0,0,0,0.5);pointer-events:none;
+    }
+    .scg-camera-msg{font-family:'JetBrains Mono',monospace;font-size:0.7rem;color:var(--red);min-height:1em;margin-bottom:6px;}
+
+    .scg-final-title{font-family:'Anton',sans-serif;font-size:2rem;margin:6px 0 10px;}
+    .scg-video-wrap{margin-top:10px;border-radius:8px;overflow:hidden;background:#000;}
+    .scg-video{width:100%;display:block;}
+    .scg-video-placeholder{
+      padding:60px 16px;text-align:center;color:var(--cream);
+      font-family:'JetBrains Mono',monospace;font-size:0.85rem;opacity:0.7;
+    }
+
+    @media (max-width:480px){
+      .scg-body{padding:26px 20px;}
+      #scg-level-2{inset:-26px -20px;padding:26px 20px;}
+      .scg-input-row{flex-direction:column;}
+      .scg-crt{padding:18px 14px 34px;}
+    }
+    </style>
+
+    <!-- CÓDIGO SECRETO -->
+    <div class="game-slot" id="game-slot-codigos">
+      <div class="scg-bg-words" aria-hidden="true">
+        <span style="top:6%;left:4%;">Distracción</span>
+        <span style="top:14%;left:70%;">¿Qué buscás aquí?</span>
+        <span style="top:32%;left:82%;">Hola ola</span>
+        <span style="top:52%;left:3%;">Pasa pasa</span>
+        <span style="top:70%;left:75%;">67</span>
+        <span style="top:88%;left:8%;">MADCO</span>
+        <span style="top:90%;left:78%;">MKII</span>
+      </div>
+      <div class="scg-bg-mask" aria-hidden="true"></div>
+      <div class="scg-bg-light" aria-hidden="true"></div>
+      <div class="scg-crt">
+        <div class="scg-crt-led"></div>
+        <div class="scg-crt-vents"></div>
+        <div class="scg-crt-screen">
+          <div class="scg-scanlines"></div>
+          <div class="scg-crt-vignette"></div>
+          <div class="scg-power-overlay" id="scg-power-overlay">6</div>
+          <button class="scg-camera-icon-btn" id="scg-camera-toggle" type="button" aria-label="Prender cámara" title="Prender cámara">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 7l-7 5 7 5V7z"></path><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
+          </button>
+          <div class="scg-camera-fullscreen" id="scg-camera-fullscreen">
+            <video class="scg-camera-video" id="scg-camera-video" autoplay muted playsinline></video>
+            <div class="scg-camera-overlay">2:40pm</div>
+          </div>
+          <div class="scg-window" id="scg-window">
+            <div class="scg-body">
+
+              <section class="scg-level" id="scg-level-1" data-level="1">
+                <span class="eyebrow">Nivel 1 / 5</span>
+                <p class="scg-challenge">Hay algo que se repite en cada rincón de este sitio — brilla, y tiene cinco puntas.</p>
+                <p class="scg-hint">Pista: mirá el logo. Mirá el pie de página. Mirá bien.</p>
+                <div class="scg-input-row">
+                  <input type="text" class="scg-input" id="scg-input-1" placeholder="Escribí el código" autocomplete="off" spellcheck="false">
+                  <button class="btn red" data-scg-submit="1" type="button">Enviar</button>
+                </div>
+                <p class="scg-error" id="scg-error-1">ERROR</p>
+              </section>
+
+              <section class="scg-level" id="scg-level-2" data-level="2">
+                <div class="scg-hidden-words" id="scg-hidden-words"></div>
+                <div class="scg-mask-overlay" id="scg-mask-overlay"></div>
+                <div class="scg-level2-content">
+                  <span class="eyebrow scg-eyebrow-light">Nivel 2 / 5</span>
+                  <p class="scg-challenge scg-challenge-light">Iluminá a...</p>
+                  <div class="scg-input-row">
+                    <input type="text" class="scg-input" id="scg-input-2" placeholder="Escribí el código" autocomplete="off" spellcheck="false">
+                    <button class="btn red" data-scg-submit="2" type="button">Enviar</button>
+                  </div>
+                  <p class="scg-error scg-error-light" id="scg-error-2">ERROR</p>
+                </div>
+              </section>
+
+              <section class="scg-level" id="scg-level-3" data-level="3">
+                <span class="eyebrow">Nivel 3 / 5</span>
+                <p class="scg-challenge">El tiempo pasa...</p>
+                <p class="scg-hint">Pista: esta vez no hay que buscar en ningún otro lado.</p>
+                <p class="scg-camera-msg" id="scg-camera-msg"></p>
+                <div class="scg-input-row">
+                  <input type="text" class="scg-input" id="scg-input-3" placeholder="Escribí el código" autocomplete="off" spellcheck="false">
+                  <button class="btn red" data-scg-submit="3" type="button">Enviar</button>
+                </div>
+                <p class="scg-error" id="scg-error-3">ERROR</p>
+              </section>
+
+              <section class="scg-level" id="scg-level-4" data-level="4">
+                <span class="eyebrow">Nivel 4 / 5</span>
+                <p class="scg-challenge">Hay mensajes encriptados aquí... <span class="scg-emoji" id="scg-emoji-3">🐨‌‌‌‌‌‌‌‌‌‍‌‌‍‍‌‌‌‌‌‌‌‌‌‌‌‍‍‌‍‍‍‍‌‌‌‌‌‌‌‌‌‍‍‍‌‌‍‍‌‌‌‌‌‌‌‌‌‍‌‍‍‍‍‍‌‌‌‌‌‌‌‌‌‍‌‍‌‌‍‍‌‌‌‌‌‌‌‌‌‍‍‌‍‌‍‍‌‌‌‌‌‌‌‌‌‍‍‌‌‍‌‍‌‌‌‌‌‌‌‌‌‍‍‌‌‍‌‍‌‌‌‌‌‌‌‌‌‍‍‍‌‌‌‌‌‌‌‌‌‌‌‌‌‍‍‌‌‍‌‍‌‌‌‌‌‌‌‌‌‍‍‍‌‌‍‌‌‌‌‌‌‌‌‌‌‍‍‍‌‌‍‍</span></p>
+                <p class="scg-hint">Pista: a veces las cosas no son lo que parecen. Copiá, pegá, investigá.</p>
+                <div class="scg-input-row">
+                  <input type="text" class="scg-input" id="scg-input-4" placeholder="Escribí el código" autocomplete="off" spellcheck="false">
+                  <button class="btn red" data-scg-submit="4" type="button">Enviar</button>
+                </div>
+                <p class="scg-error" id="scg-error-4">ERROR</p>
+              </section>
+
+              <section class="scg-level" id="scg-level-5" data-level="5">
+                <span class="eyebrow">Nivel 5 / 5</span>
+                <p class="scg-challenge">Dura...</p>
+                <div class="scg-input-row">
+                  <input type="text" class="scg-input" id="scg-input-5" placeholder="Escribí el código" autocomplete="off" spellcheck="false">
+                  <button class="btn red" data-scg-submit="5" type="button">Enviar</button>
+                </div>
+                <p class="scg-error" id="scg-error-5">ERROR</p>
+              </section>
+
+              <section class="scg-level scg-final" id="scg-level-final" data-level="final">
+                <span class="eyebrow">Completado</span>
+                <h2 class="scg-final-title">LO LOGRASTE</h2>
+                <p class="scg-challenge">Resolviste el código secreto de Los Skeepers.</p>
+                <!-- VIDEO FINAL: reemplazá el src de abajo por el archivo real cuando lo
+                     tengas (o cambiá la ruta). Mientras no exista el archivo, se muestra
+                     el aviso de "video-placeholder" en su lugar automáticamente. -->
+                <div class="scg-video-wrap">
+                  <video class="scg-video" id="scg-final-video" controls playsinline>
+                    <source src="assets/video/codigo-secreto-final.mp4" type="video/mp4">
+                  </video>
+                  <div class="scg-video-placeholder" id="scg-video-placeholder">[ VIDEO ] — todavía no se subió el archivo final</div>
+                </div>
+              </section>
+
+            </div>
+          </div>
+        </div>
+        <div class="scg-crt-brand">SKEEPER · CRT-100</div>
+        <button class="scg-power-btn" id="scg-power-btn" type="button" aria-label="Apagar" title="Apagar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v8"></path><path d="M18.4 6.6a9 9 0 1 1-12.8 0"></path></svg>
+        </button>
+      </div>
+      <div class="scg-crt-stand"></div>
+      <div class="scg-crt-base"></div>
+      <div class="scg-keyboard" aria-hidden="true">
+        <div class="scg-keyboard-row">
+          <div class="scg-key"></div><div class="scg-key"></div><div class="scg-key"></div><div class="scg-key"></div><div class="scg-key"></div>
+          <div class="scg-key"></div><div class="scg-key"></div><div class="scg-key"></div><div class="scg-key"></div><div class="scg-key"></div>
+          <div class="scg-key"></div><div class="scg-key"></div><div class="scg-key"></div><div class="scg-key wide"></div>
+        </div>
+        <div class="scg-keyboard-row">
+          <div class="scg-key wide"></div>
+          <div class="scg-key"></div><div class="scg-key"></div><div class="scg-key"></div><div class="scg-key"></div><div class="scg-key"></div>
+          <div class="scg-key"></div><div class="scg-key"></div><div class="scg-key"></div><div class="scg-key"></div><div class="scg-key"></div>
+          <div class="scg-key"></div><div class="scg-key wide"></div>
+        </div>
+        <div class="scg-keyboard-row">
+          <div class="scg-key"></div><div class="scg-key"></div><div class="scg-key"></div><div class="scg-key"></div><div class="scg-key"></div>
+          <div class="scg-key"></div><div class="scg-key"></div><div class="scg-key"></div><div class="scg-key"></div><div class="scg-key"></div>
+        </div>
+        <div class="scg-keyboard-row">
+          <div class="scg-key wide"></div><div class="scg-key xwide"></div><div class="scg-key wide"></div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -802,6 +1198,274 @@
     <button class="btn small alt" id="share-close" style="width:100%;justify-content:center;">Cerrar</button>
   </div>
 </div>
+
+
+
+<!-- ================================================================
+     Lógica del juego de código secreto (en línea, autocontenida).
+     Se integra como un game-slot más: cuando "codigos" se activa dentro
+     de #game-overlay, este script reacciona igual que Atrapa/Corre. -->
+<script>
+(function(){
+  const SCG_SALT = 'skeepers-secreto-v1';
+  // hashes SHA-256 de cada respuesta ya normalizada (mayúsculas, sin
+  // acentos ni espacios) — así el código correcto no queda a la vista
+  // con solo abrir "ver código fuente" de la página.
+  const SCG_HASHES = [
+    '0764b5fde5722f06d5599cf473df5797f15789a5443d709c1fd4a527c678c1eb', // 1: ESTRELLA
+    'e57058177e126eeb3ea6300e5a0dd931fc85773b2938eff0f3317c02462e257f', // 2: CONTRALUZ
+    'ec4213588863176d2c3e2f797507d95b0cff0777654cb9ad2a73eaf70d029031', // 3: 'Si te gusta?' (aparece sobrepuesto al prender la cámara — OJO: mismo código que el nivel 5, a propósito según lo pedido)
+    '1ce4ef828804e30f6c611ded6716e67ea32b9c2a73ff3ae01d59b8ee6331997c', // 4: Los_Skeepers
+    'ec4213588863176d2c3e2f797507d95b0cff0777654cb9ad2a73eaf70d029031'  // 5: "Si te gusta?"
+  ];
+
+  function normalize(s){
+    return s.trim().toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^A-Z0-9]/g, '');
+  }
+
+  async function sha256Hex(str){
+    const buf = new TextEncoder().encode(str);
+    const digest = await crypto.subtle.digest('SHA-256', buf);
+    return [...new Uint8Array(digest)].map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  async function chainProof(level){
+    let acc = SCG_SALT;
+    for (let i = 0; i < level; i++) acc = await sha256Hex(acc + '|' + SCG_HASHES[i]);
+    return acc;
+  }
+
+  const STORAGE_KEY = 'scg_progress_v1';
+  let scgLevel = 1; // siempre arranca en 1 -- nunca depende de la URL ni de un ancla
+
+  async function loadProgress(){
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      const data = JSON.parse(raw);
+      const storedLevel = Number(data.level) || 0;
+      if (storedLevel < 1 || storedLevel > 5) return;
+      const expected = await chainProof(storedLevel);
+      if (data.proof === expected) scgLevel = storedLevel + 1;
+    } catch(e) { /* si algo falla o está corrupto, se queda en nivel 1 */ }
+  }
+
+  async function saveProgress(solvedLevel){
+    const proof = await chainProof(solvedLevel);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ level: solvedLevel, proof: proof }));
+  }
+
+  function showLevel(n){
+    document.querySelectorAll('.scg-level').forEach(el => {
+      el.classList.toggle('active', el.dataset.level === String(n));
+    });
+  }
+
+  function renderCurrentLevel(){
+    const current = scgLevel >= 6 ? 'final' : scgLevel;
+    showLevel(current);
+    const iconBtn = document.getElementById('scg-camera-toggle');
+    if (iconBtn){
+      iconBtn.classList.toggle('scg-show-icon', current === 3);
+      if (current !== 3 && typeof stopCamera === 'function') stopCamera();
+    }
+  }
+
+  async function handleSubmit(levelNum, inputEl, errorEl){
+    const value = inputEl.value;
+    if (!value.trim()) return;
+    const hash = await sha256Hex(normalize(value));
+    if (hash === SCG_HASHES[levelNum - 1]){
+      errorEl.classList.remove('show', 'scg-error-glitchy');
+      inputEl.value = '';
+      await saveProgress(levelNum);
+      scgLevel = levelNum + 1;
+      renderCurrentLevel();
+    } else {
+      errorEl.classList.remove('show', 'scg-error-glitchy');
+      void errorEl.offsetWidth;
+      errorEl.classList.add('show', 'scg-error-glitchy');
+      inputEl.value = '';
+    }
+  }
+
+  document.querySelectorAll('[data-scg-submit]').forEach(btn => {
+    const n = Number(btn.dataset.scgSubmit);
+    const input = document.getElementById('scg-input-' + n);
+    const error = document.getElementById('scg-error-' + n);
+    btn.addEventListener('click', () => handleSubmit(n, input, error));
+    input.addEventListener('keydown', (e) => { if (e.key === 'Enter') handleSubmit(n, input, error); });
+  });
+
+  // nivel 2: varias copias de "Hora y Media" repartidas al azar por la
+  // pantalla, invisibles (blancas debajo de una tapa negra) — solo se ven
+  // donde pasa el círculo de luz que sigue al mouse
+  // palabras escondidas en TODO el fondo negro del juego (no solo el nivel 2) —
+  // totalmente invisibles (tapadas por una máscara negra opaca) hasta que el
+  // círculo de luz que sigue al mouse pasa por encima, igual que la linterna
+  const scgSlotForWords = document.getElementById('game-slot-codigos');
+  const scgBgMask = document.querySelector('.scg-bg-mask');
+  const scgBgLight = document.querySelector('.scg-bg-light');
+  if (scgSlotForWords && scgBgMask && scgBgLight){
+    scgSlotForWords.addEventListener('mousemove', (e) => {
+      const rect = scgSlotForWords.getBoundingClientRect();
+      const x = (e.clientX - rect.left) + 'px';
+      const y = (e.clientY - rect.top) + 'px';
+      scgBgMask.style.setProperty('--bx', x);
+      scgBgMask.style.setProperty('--by', y);
+      scgBgLight.style.setProperty('--bx', x);
+      scgBgLight.style.setProperty('--by', y);
+    });
+    scgSlotForWords.addEventListener('mouseleave', () => {
+      scgBgMask.style.setProperty('--bx', '-999px');
+      scgBgMask.style.setProperty('--by', '-999px');
+      scgBgLight.style.setProperty('--bx', '-999px');
+      scgBgLight.style.setProperty('--by', '-999px');
+    });
+  }
+
+  const level2El = document.getElementById('scg-level-2');
+  const maskOverlay = document.getElementById('scg-mask-overlay');
+  const hiddenWordsWrap = document.getElementById('scg-hidden-words');
+  const CLUE_TEXT = 'Hora y Media';
+  function scatterHiddenWords(){
+    if (!hiddenWordsWrap || hiddenWordsWrap.children.length) return;
+    const spots = [[36, 80]]; // una sola vez, bien abajo de la barra de texto para que no se tape
+    spots.forEach(([leftPct, topPct]) => {
+      const span = document.createElement('span');
+      span.className = 'scg-hidden-word';
+      span.textContent = CLUE_TEXT;
+      span.style.left = leftPct + '%';
+      span.style.top = topPct + '%';
+      hiddenWordsWrap.appendChild(span);
+    });
+  }
+  if (level2El && maskOverlay){
+    scatterHiddenWords();
+    level2El.addEventListener('mousemove', (e) => {
+      const rect = level2El.getBoundingClientRect();
+      maskOverlay.style.setProperty('--sx', (e.clientX - rect.left) + 'px');
+      maskOverlay.style.setProperty('--sy', (e.clientY - rect.top) + 'px');
+    });
+    level2El.addEventListener('mouseleave', () => {
+      maskOverlay.style.setProperty('--sx', '-999px');
+      maskOverlay.style.setProperty('--sy', '-999px');
+    });
+    // en celular no hay mouse -- tocar revela una zona alrededor del toque
+    level2El.addEventListener('touchmove', (e) => {
+      const rect = level2El.getBoundingClientRect();
+      const t = e.touches[0];
+      maskOverlay.style.setProperty('--sx', (t.clientX - rect.left) + 'px');
+      maskOverlay.style.setProperty('--sy', (t.clientY - rect.top) + 'px');
+    }, { passive: true });
+  }
+
+  // nivel 4: cámara del usuario a pantalla completa dentro del monitor,
+  // muestra "2:40pm" sobrepuesto, pero el código a escribir es "Si te gusta?"
+  // (no es lo mismo que se ve en pantalla — a propósito). El ícono de arriba
+  // a la derecha prende y apaga.
+  const cameraFullscreen = document.getElementById('scg-camera-fullscreen');
+  const cameraVideo = document.getElementById('scg-camera-video');
+  const cameraToggle = document.getElementById('scg-camera-toggle');
+  const cameraMsg = document.getElementById('scg-camera-msg');
+  let cameraStream = null;
+  function stopCamera(){
+    if (cameraStream){
+      cameraStream.getTracks().forEach(t => t.stop());
+      cameraStream = null;
+    }
+    if (cameraVideo) cameraVideo.srcObject = null;
+    if (cameraFullscreen) cameraFullscreen.classList.remove('scg-camera-on');
+    if (cameraToggle){
+      cameraToggle.classList.remove('scg-camera-active');
+      cameraToggle.disabled = false;
+      cameraToggle.title = 'Prender cámara';
+      cameraToggle.setAttribute('aria-label', 'Prender cámara');
+    }
+  }
+  if (cameraToggle){
+    cameraToggle.addEventListener('click', async () => {
+      if (cameraMsg) cameraMsg.textContent = '';
+      if (cameraStream){
+        stopCamera();
+        return;
+      }
+      try {
+        cameraStream = await navigator.mediaDevices.getUserMedia({ video: true });
+        cameraVideo.srcObject = cameraStream;
+        cameraFullscreen.classList.add('scg-camera-on');
+        cameraToggle.classList.add('scg-camera-active');
+        cameraToggle.title = 'Quitar cámara';
+        cameraToggle.setAttribute('aria-label', 'Quitar cámara');
+      } catch(e){
+        if (cameraMsg) cameraMsg.textContent = 'No se pudo prender la cámara — revisá los permisos del navegador.';
+      }
+    });
+  }
+
+  // botón de apagado: animación estilo CRT viejo (la pantalla se colapsa a un
+  // punto), muestra el número "6" como si fuera un reflejo tenue en el vidrio
+  // apagado, y al volver a prender hace la animación al revés
+  const powerBtn = document.getElementById('scg-power-btn');
+  const powerOverlay = document.getElementById('scg-power-overlay');
+  const scgWindowEl = document.getElementById('scg-window');
+  let scgIsOff = false;
+  if (powerBtn && powerOverlay && scgWindowEl){
+    powerBtn.addEventListener('click', () => {
+      if (!scgIsOff){
+        scgIsOff = true;
+        powerBtn.classList.add('scg-power-off');
+        scgWindowEl.classList.remove('scg-powering-on');
+        void scgWindowEl.offsetWidth;
+        scgWindowEl.classList.add('scg-powering-off');
+        setTimeout(() => {
+          scgWindowEl.style.visibility = 'hidden';
+          powerOverlay.classList.add('scg-show-power');
+        }, 580);
+      } else {
+        scgIsOff = false;
+        powerBtn.classList.remove('scg-power-off');
+        powerOverlay.classList.remove('scg-show-power');
+        scgWindowEl.style.visibility = 'visible';
+        scgWindowEl.classList.remove('scg-powering-off');
+        void scgWindowEl.offsetWidth;
+        scgWindowEl.classList.add('scg-powering-on');
+      }
+    });
+  }
+
+  const finalVideo = document.getElementById('scg-final-video');
+  const videoPlaceholder = document.getElementById('scg-video-placeholder');
+  if (finalVideo && videoPlaceholder){
+    videoPlaceholder.style.display = 'none';
+    finalVideo.addEventListener('error', () => {
+      finalVideo.style.display = 'none';
+      videoPlaceholder.style.display = 'block';
+    });
+  }
+
+  // se integra como un game-slot más: cuando este slot se activa dentro del
+  // overlay compartido de juegos, retomamos el nivel correcto (igual que
+  // Atrapa/Corre reinician su estado al abrirse)
+  const scgSlotEl = document.getElementById('game-slot-codigos');
+  const scgGameOverlayEl = document.getElementById('game-overlay');
+  async function scgOnShow(){
+    await loadProgress();
+    renderCurrentLevel();
+  }
+  if (scgSlotEl && scgGameOverlayEl){
+    const scgSlotObserver = new MutationObserver(() => {
+      const isShown = scgSlotEl.classList.contains('active') && scgGameOverlayEl.classList.contains('open');
+      if (isShown) scgOnShow();
+      else stopCamera(); // por privacidad: se apaga sola al salir del juego
+    });
+    scgSlotObserver.observe(scgSlotEl, { attributes: true, attributeFilter: ['class'] });
+    scgSlotObserver.observe(scgGameOverlayEl, { attributes: true, attributeFilter: ['class'] });
+  }
+  window.addEventListener('beforeunload', stopCamera);
+
+})();
+</script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js"></script>

@@ -2,7 +2,7 @@
 try{
   const GAMES = [
     { slug:'quiz',     name:'¿QUÉ SKEEPER SOS?',      ready:true  },
-    { slug:'codigos',  name:'LOS CÓDIGOS SECRETOS',     ready:false },
+    { slug:'codigos',  name:'CÓDIGO SECRETO',           ready:true  },
     { slug:'memorama', name:'MEMORAMA SKEEPER',         ready:false },
     { slug:'atrapa',   name:'REÚNE MÁS FANS',           ready:true  },
     { slug:'corre',    name:'HORA Y MEDIA SIN LLEGAR',  ready:true  },
@@ -53,23 +53,48 @@ try{
     const slot = document.getElementById('game-slot-' + slug);
     if (slot) slot.classList.add('active');
 
-    gameOverlayTag.textContent = g.name;
+    if (gameOverlayTag) gameOverlayTag.textContent = g.name;
     gameOverlay.classList.add('open');
     document.body.classList.add('lock');
     gameOverlay.scrollTop = 0;
-    // history.replaceState puede tronar (SecurityError) si el archivo se abre con file://
-    try { history.replaceState(null, '', '#' + slug); } catch(e){}
+    // pushState (no replaceState) para que quede una entrada en el historial —
+    // así el botón "atrás" del navegador cierra el juego en vez de irse del sitio.
+    // history.pushState puede tronar (SecurityError) si el archivo se abre con file://
+    try {
+      if (!(history.state && history.state.gameSlug === slug)) {
+        history.pushState({ gameSlug: slug }, '', '#' + slug);
+      }
+    } catch(e){}
   }
 
-  function closeGame(){
+  // expuesto globalmente por si algo más necesita abrir un juego con la misma
+  // navegación que usan las tarjetas de la Sala de Juegos
+  window.openGame = openGame;
+
+  // fromPopState=true cuando nos llama el listener de popstate (el usuario ya
+  // se movió en el historial, así que acá NO hay que tocarlo de nuevo)
+  function closeGame(fromPopState){
     gameOverlay.classList.remove('open');
     document.body.classList.remove('lock');
-    try { history.replaceState(null, '', '#juegos'); } catch(e){}
+    if (!fromPopState){
+      try {
+        if (history.state && history.state.gameSlug) history.back();
+        else history.replaceState(null, '', '#juegos');
+      } catch(e){}
+    }
     const juegosSection = document.getElementById('juegos');
     if (juegosSection) juegosSection.scrollIntoView({ behavior:'auto', block:'start' });
   }
 
-  document.getElementById('game-back').addEventListener('click', closeGame);
+  document.getElementById('game-back').addEventListener('click', () => closeGame(false));
+
+  // el botón "atrás" del navegador dispara esto: si el juego seguía abierto y
+  // el nuevo estado ya no tiene el gameSlug, es que el usuario quiso salir
+  window.addEventListener('popstate', () => {
+    if (gameOverlay.classList.contains('open') && !(history.state && history.state.gameSlug)){
+      closeGame(true);
+    }
+  });
 
   document.getElementById('gb-left').addEventListener('click', () => moveGame(-1));
   document.getElementById('gb-right').addEventListener('click', () => moveGame(1));
